@@ -1,0 +1,1718 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Walker · Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Inter+Tight:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<!--
+  WALKER · Terminal. Creado el 30/10/2026 por Claude Code para Jose.
+  Todo el contenido llega cifrado (c/*.bin) y se descifra aquí con la
+  contraseña (PBKDF2 + AES-GCM, WebCrypto). Lo genera construir_terminal.py.
+-->
+<style>
+:root{
+  --papel:#FAF7F1; --papel-2:#F3EEE4; --linea:#E2D9C8; --linea-2:#D7CDBB; --blanco:#FFFFFF;
+  --texto:#1B1712; --texto-2:#4A4236; --gris:#6E6557;
+  --pizarra:#2E5F73; --pizarra-osc:#1F4252; --pizarra-suave:#E6EEF1; --pizarra-borde:#C9D6DC;
+  --tinta:#2E4D73; --ocre:#8E6A2F; --ocre-suave:#F1E5CB;
+  --verde-f:#E3EADB; --verde-t:#3B5A2C; --ambar-f:#F1E5CB; --ambar-t:#76561F; --rojo-f:#F0DCD6; --rojo-t:#8A3A2C;
+  --serif:'Newsreader', Georgia, serif; --titular:'Fraunces', Georgia, serif; --mano:'Caveat', cursive; --sans:'Inter Tight', system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--papel);color:var(--texto);font-family:var(--serif);font-size:17px;line-height:1.55}
+a{color:var(--pizarra)} a:hover{color:var(--pizarra-osc)}
+button{font:inherit}
+[hidden]{display:none !important}
+.rotulo{font:600 11px/1.4 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--gris)}
+.mano{font-family:var(--mano);color:var(--tinta);line-height:1.15}
+.subrayado{background:linear-gradient(transparent 58%,rgba(214,170,92,.5) 58%,rgba(214,170,92,.5) 92%,transparent 92%)}
+h1{margin:18px 0 0;font:400 clamp(30px,3.6vw,44px)/1.06 var(--titular);letter-spacing:-.01em}
+h2{margin:40px 0 10px;font:400 24px/1.2 var(--titular);border-bottom:1.5px solid var(--texto);padding-bottom:8px}
+.entradilla{margin:10px 0 0;font-size:18px;color:var(--texto-2);max-width:720px}
+.boton{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:6px;border:0;background:var(--pizarra);color:#fff;text-decoration:none;font:600 14px var(--sans);cursor:pointer}
+.boton:hover{background:var(--pizarra-osc);color:#fff}
+.boton--suave{background:var(--pizarra-suave);color:var(--pizarra-osc);border:1px solid var(--pizarra-borde)}
+.boton--suave:hover{background:#D9E5EA;color:var(--pizarra-osc)}
+.boton--peq{min-height:36px;padding:0 12px;font-size:12px}
+:focus-visible{outline:2px solid var(--ocre);outline-offset:2px}
+
+/* ---------- Entrada ---------- */
+#entrada{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--papel-2)}
+#entrada form{width:100%;max-width:400px}
+#entrada .marca{font:300 64px/1 var(--titular);color:var(--pizarra)}
+#entrada label{display:block;margin-top:34px;font:600 11px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--gris)}
+#entrada input[type=password]{width:100%;margin-top:8px;min-height:48px;padding:0 14px;border:1px solid var(--linea-2);border-radius:6px;background:#fff;font:16px var(--sans)}
+#entrada .recordar{display:flex;align-items:center;gap:8px;margin-top:12px;font:14px var(--sans);color:var(--texto-2);letter-spacing:0;text-transform:none}
+#entrada .boton{margin-top:20px;width:100%;justify-content:center}
+#error{min-height:24px;margin-top:12px;font:14px var(--sans);color:var(--rojo-t)}
+
+/* ---------- Marco ---------- */
+.marco{min-height:100vh;display:flex;flex-wrap:wrap}
+nav.lateral{flex:1 1 240px;max-width:280px;padding:32px 22px;background:var(--papel-2);border-right:1px solid var(--linea);display:flex;flex-direction:column;gap:22px}
+nav .marca{font:300 40px/1 var(--titular);color:var(--pizarra)}
+nav .lema{margin-top:8px;font:600 10px/1.5 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--gris)}
+nav .grupo{font:600 10px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--gris);padding:16px 12px 6px}
+nav a.item{display:flex;flex-direction:column;justify-content:center;min-height:44px;padding:8px 12px;border-radius:6px;text-decoration:none;color:var(--texto)}
+nav a.item span{font:400 18px var(--titular)}
+nav a.item small{font:12px var(--sans);color:var(--gris)}
+nav a.item:hover{background:#EDE6D8}
+nav a.item[aria-current=page]{background:var(--pizarra-suave);color:var(--pizarra-osc)}
+nav .pie{margin-top:auto;border-top:1px solid var(--linea-2);padding-top:16px}
+nav .pie p{margin:0}
+nav .salir{margin-top:12px;background:none;border:0;padding:0;font:12px var(--sans);color:var(--gris);text-decoration:underline;cursor:pointer;min-height:32px}
+main{flex:999 1 560px;min-width:0;padding:40px clamp(18px,4vw,64px) 64px}
+.ancho{max-width:1060px;margin:0 auto}
+@media (max-width:720px){
+  nav.lateral{max-width:none;border-right:0;border-bottom:1px solid var(--linea);padding:20px 16px;gap:10px}
+  nav .menu{display:flex;flex-wrap:wrap;gap:4px} nav .grupo{display:none} nav .pie{display:none}
+  nav a.item{min-height:40px;padding:6px 10px} nav a.item small{display:none}
+}
+
+/* ---------- Visión ---------- */
+.cabecera{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.capas{margin-top:30px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.capa{background:var(--blanco);border:1px solid var(--linea);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.capa .motivo{font-size:14px;line-height:1.4;color:var(--texto-2)}
+.estado{align-self:flex-start;padding:3px 10px;border-radius:99px;font:600 13px var(--sans)}
+.estado--verde{background:var(--verde-f);color:var(--verde-t)} .estado--ambar{background:var(--ambar-f);color:var(--ambar-t)} .estado--rojo{background:var(--rojo-f);color:var(--rojo-t)} .estado--nada{background:#EEE9E0;color:var(--gris)}
+.dos{margin-top:34px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px;align-items:start}
+.dos h2{margin-top:0}
+.caja{background:var(--papel-2);border-top:1.5px solid var(--texto);padding:18px 20px 20px}
+.caja p{margin:8px 0 0;font-size:16px}
+.lista-semanas a{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:48px;border-bottom:1px solid var(--linea);text-decoration:none;color:var(--texto)}
+.lista-semanas a span:last-child{font:12px var(--sans);color:var(--pizarra)}
+.lista-semanas{border-top:1px solid var(--linea)}
+
+/* ---------- Tarjetas ---------- */
+.pastillas{margin-top:22px;display:flex;flex-wrap:wrap;gap:8px}
+.pastillas a{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:99px;border:1px solid var(--pizarra-borde);background:#fff;color:var(--pizarra-osc);text-decoration:none;font:600 13px var(--sans)}
+.pastillas a[aria-current=page]{background:var(--pizarra);border-color:var(--pizarra);color:#fff}
+.rejilla{margin-top:26px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px}
+.tarjeta{background:var(--blanco);border:1px solid var(--linea);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+.tarjeta .foto{padding:14px 14px 0;background:var(--papel-2)}
+.pegada{display:block;width:100%;height:150px;object-fit:cover;border:5px solid #fff;background:#E9E2D4;box-shadow:0 3px 8px rgba(0,0,0,.15);transform:rotate(-1deg)}
+.tarjeta:nth-child(even) .pegada{transform:rotate(1deg)}
+.tarjeta .pie-foto{margin:8px 0 10px;font-size:17px}
+.tarjeta .cuerpo{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tarjeta h3{margin:0;font:400 20px var(--titular);display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.tarjeta h3 small,.ticker{font:600 11px var(--sans);color:var(--gris)}
+.tarjeta .desc{margin:0;font-size:15px;line-height:1.4;color:var(--texto-2)}
+.titular-tesis{margin:4px 0 0;font:italic 400 16px/1.3 var(--titular);color:var(--pizarra)}
+.tarjeta .acciones{margin-top:auto;padding-top:12px;border-top:1px solid #EFE8DB;display:flex;flex-direction:column;gap:10px}
+.tarjeta .ultimo{font:12px/1.4 var(--sans);color:var(--texto-2)} .tarjeta .ultimo b{color:var(--gris);font-weight:600}
+.botones{display:flex;flex-wrap:wrap;gap:8px}
+.etiqueta{align-self:flex-start;display:inline-block;padding:2px 8px;border-radius:99px;background:var(--ocre-suave);color:var(--ambar-t);font:600 11px var(--sans)}
+.tambien{margin-top:30px;border-top:1px solid var(--linea);padding-top:14px;font-size:15px;color:var(--texto-2)}
+
+/* Rentabilidad por estrategia y cartera (rediseño del 06/11/2026, opción B elegida por Jose):
+   la rentabilidad esperada es lo primero que se lee; los datos no cambian. */
+.panel{margin-top:22px;background:var(--blanco);border:1px solid var(--linea);border-radius:10px;box-shadow:0 6px 24px rgba(27,23,18,.07);overflow:hidden}
+.panel-cab{display:flex;justify-content:space-between;align-items:baseline;gap:8px 16px;flex-wrap:wrap;padding:18px 22px 14px;border-bottom:1px solid var(--linea)}
+.panel-cab h2{margin:0;border:0;padding:0;font-size:26px}
+.panel-cab .nota-gris{font-size:12px}
+.cifra-tir{font:600 26px/1 var(--sans);font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:var(--verde-t);white-space:nowrap}
+.cifra-tir--negativa{color:var(--rojo-t)}
+.cifra-tir--nada{color:var(--linea-2);font-weight:400}
+.ranking .fila{display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(200px,1.6fr) minmax(250px,1.4fr);gap:8px 22px;align-items:center;padding:16px 22px;border-top:1px solid #EFE8DB}
+.ranking .fila:first-of-type{border-top:0}
+.ranking .nombre-empresa{font:400 19px var(--titular);color:var(--texto);text-decoration:none}
+.ranking a.nombre-empresa:hover{text-decoration:underline}
+.ranking small{display:block;font:11px/1.45 var(--sans);color:var(--gris)}
+.ranking .medida{display:flex;align-items:center;gap:14px}
+.ranking .medida .cifra-tir{min-width:88px}
+.pista{position:relative;flex:1;height:10px;background:var(--papel-2);border-radius:5px}
+.pista b{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--verde-t)}
+.pista .vara{position:absolute;top:-6px;bottom:-6px;border-left:1.5px dashed var(--ocre)}
+.pista .vara em{position:absolute;top:-17px;left:-14px;font:600 10px var(--sans);font-style:normal;color:var(--ocre);white-space:nowrap}
+.ranking .datos{font:13px/1.45 var(--sans);text-align:right;font-variant-numeric:tabular-nums;color:var(--texto-2)}
+.ranking .datos strong{font-weight:600;color:var(--texto)}
+.rango-52{position:relative;display:inline-block;width:70px;height:4px;margin:0 6px 2px 0;background:var(--linea);border-radius:4px;vertical-align:middle}
+.rango-52 span{position:absolute;top:-2px;width:8px;height:8px;border-radius:50%;background:var(--pizarra);transform:translateX(-50%)}
+.pendientes{padding:14px 22px;background:var(--papel-2);border-top:1px solid var(--linea);font:13px/1.6 var(--sans);color:var(--texto-2)}
+.pendientes a{color:var(--texto)}
+.fuente-valoracion{border:0;background:none;padding:0;color:var(--pizarra);font:11px/1.4 var(--sans);text-decoration:underline;cursor:pointer;min-height:28px}
+.notas-tabla{margin:10px 0 0;font:12px/1.5 var(--sans);color:var(--gris)}
+.notas-tabla p{margin:4px 0}
+@media (max-width:720px){
+  .panel-cab{padding:16px 16px 12px}
+  .ranking .fila{grid-template-columns:1fr;padding:14px 16px}
+  .ranking .datos{text-align:left}
+  .ranking .medida{margin-top:14px}
+  .pendientes{padding:12px 16px}
+}
+/* Cartera */
+.reparto{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.reparto a{display:block;padding:18px 20px;border-radius:10px;color:#fff;text-decoration:none}
+.reparto a:hover{color:#fff;filter:brightness(1.08)}
+.reparto .rotulo{color:rgba(255,255,255,.82)}
+.reparto .cifra{display:block;margin-top:6px;font:300 46px/1 var(--titular)}
+.reparto small{display:block;margin-top:6px;font:13px var(--sans);color:rgba(255,255,255,.88)}
+.posiciones .cab,.posiciones .fila{display:grid;grid-template-columns:minmax(140px,1.3fr) minmax(160px,2fr) 62px 84px 84px 80px;gap:6px 14px;align-items:center;padding:11px 22px;font:13px var(--sans);font-variant-numeric:tabular-nums}
+.posiciones .cab{padding-top:9px;padding-bottom:9px;background:var(--papel-2);font:600 11px/1.3 var(--sans);color:var(--gris)}
+.posiciones .cab span:nth-child(n+3),.posiciones .num{text-align:right}
+.posiciones .fila{border-top:1px solid #EFE8DB}
+.posiciones .nombre-empresa{font:400 17px var(--serif);color:var(--texto);text-decoration:none}
+.posiciones a.nombre-empresa:hover{text-decoration:underline}
+.posiciones small{display:block;font:11px/1.4 var(--sans);color:var(--gris)}
+.posiciones .peso{display:flex;align-items:center;gap:10px}
+.posiciones .peso i{display:block;height:12px;border-radius:3px;flex:none}
+.posiciones .tir{text-align:right;font:600 16px var(--sans);color:var(--verde-t)}
+.posiciones .tir--nada{color:var(--linea-2);font-weight:400}
+.posiciones .tir--negativa{color:var(--rojo-t)}
+.posiciones .peso-estr{color:var(--texto)}
+.posiciones .objetivo-movil{display:none}
+@media (max-width:720px){
+  .posiciones .cab,.posiciones .fila{grid-template-columns:1fr 70px 70px;padding:10px 16px}
+  .posiciones .cab span:nth-child(2),.posiciones .cab span:nth-child(4),.posiciones .cab span:nth-child(5){display:none}
+  .posiciones .peso{grid-column:1/-1;order:5}
+  .posiciones .precio{display:none}
+  .posiciones .objetivo-movil{display:block}
+  .reparto{grid-template-columns:repeat(3,1fr);gap:8px}
+  .reparto a{padding:12px 10px}
+  .reparto .rotulo{font-size:9px;letter-spacing:.08em}
+  .reparto .cifra{font-size:28px}
+  .reparto small{font-size:11px}
+}
+
+/* ---------- Empresa ---------- */
+.volver{display:inline-flex;align-items:center;gap:8px;min-height:44px;font:600 13px var(--sans);text-decoration:none}
+.ficha{margin-top:14px;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.ficha .foto{flex:0 0 auto;width:280px;max-width:100%}
+.ficha .pegada{height:190px;border-width:6px;transform:rotate(-1.5deg)}
+.ficha .credito{margin-top:8px;font:10px/1.4 var(--sans);color:var(--gris)}
+.ficha .texto{flex:1 1 320px;min-width:0}
+.trimestre{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:14px 0;border-bottom:1px solid var(--linea)}
+.trimestre .periodo{flex:0 0 150px;font:400 20px var(--titular)}
+.trimestre .botones{flex:1 1 300px}
+.nota-gris{font:12px var(--sans);color:var(--gris)}
+
+/* ---------- Cartera, método, recursos ---------- */
+.tabla-caja{overflow-x:auto}
+table{width:100%;min-width:600px;border-collapse:collapse;font:13px var(--sans)}
+th{text-align:left;padding:12px 8px 8px;font:600 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--gris)}
+td{padding:12px 8px;border-top:1px solid var(--linea)}
+.prosa{max-width:760px} .prosa h2{margin-top:36px} .prosa p,.prosa li{font-size:17px}
+.prosa blockquote{margin:24px 0;font:italic 300 clamp(24px,2.6vw,32px)/1.25 var(--titular);color:var(--pizarra)}
+.aviso-legal{margin-top:56px;padding-top:16px;border-top:1px solid var(--linea);font:12px/1.5 var(--sans);color:var(--gris);max-width:760px}
+.vacio{margin-top:26px;font-size:17px;color:var(--texto-2)}
+
+/* ---------- Salida privada (fase 3, 08/11/2026) ---------- */
+.sello-privado{display:inline-block;margin-top:10px;padding:3px 10px;border-radius:99px;background:var(--texto);color:var(--papel);font:600 10px var(--sans);letter-spacing:.2em;text-transform:uppercase}
+.opiniones .recuento{margin:8px 0 0;font:13px/1.5 var(--sans);color:var(--gris)}
+.opiniones .debate{margin:12px 0 0;max-width:760px;font:italic 400 19px/1.4 var(--titular);color:var(--texto)}
+.opiniones .debate--largo{font:400 16px/1.55 var(--serif);color:var(--texto-2)}
+.lados{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;align-items:start}
+.lado h3{margin:0;padding-bottom:6px;border-bottom:2px solid;font:600 11px var(--sans);letter-spacing:.18em;text-transform:uppercase}
+.lado--alcista h3{color:var(--verde-t);border-color:var(--verde-t)}
+.lado--bajista h3{color:var(--rojo-t);border-color:var(--rojo-t)}
+.argumento{padding:14px 0;border-bottom:1px solid var(--linea)}
+.argumento h4{margin:0;font:400 18px/1.3 var(--titular)}
+.argumento .tema{display:block;margin-bottom:2px;font:600 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--gris)}
+.argumento p{margin:6px 0 0;font-size:15px;line-height:1.45;color:var(--texto-2)}
+.argumento .fuentes{font:12px/1.6 var(--sans);color:var(--gris)}
+.chip{display:inline-block;margin-left:4px;padding:1px 7px;border-radius:99px;background:#EEE9E0;color:var(--gris);font:600 10px/1.6 var(--sans);vertical-align:1px}
+.chip--pago{background:var(--ocre-suave);color:var(--ambar-t)}
+.chip--nuevo{background:var(--pizarra-suave);color:var(--pizarra-osc)}
+.discrepo{margin-top:22px;padding:12px 18px;background:#fff;border-left:3px solid var(--tinta);max-width:760px}
+.discrepo .mano{font-size:22px}
+.vigilancia{margin:8px 0 0;padding-left:20px;font-size:15px;color:var(--texto-2)}
+.marco-bib{display:block;width:100%;height:calc(100vh - 190px);min-height:480px;margin-top:18px;border:1px solid var(--linea);border-radius:8px;background:#fff}
+.radar-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;padding:12px 0;border-bottom:1px solid var(--linea)}
+.radar-item a.titulo{font:400 17px/1.35 var(--serif);color:var(--texto);text-decoration:none}
+.radar-item a.titulo:hover{text-decoration:underline}
+.radar-item .meta{font:12px/1.5 var(--sans);color:var(--gris)}
+.radar-item .tickers{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;align-items:flex-start}
+.radar-item .tickers a{font:600 11px var(--sans);text-decoration:none;padding:2px 8px;border:1px solid var(--pizarra-borde);border-radius:99px;background:#fff}
+@media (max-width:720px){ .radar-item{grid-template-columns:1fr} .radar-item .tickers{justify-content:flex-start} .marco-bib{height:calc(100vh - 230px)} }
+
+/* ---------- Repaso de tesis (09/11/2026; versión visual del 10/11/2026, a partir de las maquetas de Jose) ---------- */
+.rp-hoja{max-width:820px}
+.rp-titulo{margin:0;font:400 clamp(30px,3.4vw,40px)/1.1 var(--titular)}
+.rp-sub{margin:6px 0 0;font:15px/1.5 var(--sans);color:var(--gris)}
+.rp-tarjeta{margin-top:22px;background:var(--blanco);border:1px solid var(--linea);border-radius:14px;padding:22px 24px}
+.rp-sec{margin:26px 0 8px;font:500 13px var(--sans);color:var(--gris)}
+.rp-sec:first-child{margin-top:0}
+.rp-ag{display:flex;gap:16px;align-items:baseline;padding:11px 0;border-top:1px solid var(--linea);font:15px/1.4 var(--sans)}
+.rp-ag .f{flex:0 0 92px;color:var(--gris)}
+.rp-ag a{font-weight:600;color:var(--texto);text-decoration:none}
+a.rp-emp{display:block;padding:16px 0;border-top:1px solid var(--linea);text-decoration:none;color:var(--texto)}
+a.rp-emp:hover .n{text-decoration:underline}
+.rp-emp .l{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.rp-emp .n{font:400 21px var(--titular)}
+.rp-emp .m{font:14px var(--sans);color:var(--gris)}
+.rp-emp .flecha{font:20px var(--sans);color:var(--gris)}
+.rp-salud{display:flex;gap:6px;margin-top:10px}
+.rp-salud i{flex:1;height:8px;border-radius:4px;background:#EEE9E0}
+.rp-salud i.intacta{background:#5E8F45} .rp-salud i.bajo_presion{background:#E3B04B} .rp-salud i.en_vigilancia{background:#A3A39B}
+.rp-pista{margin:18px 0 0;font:13px var(--sans);color:var(--gris)}
+.rp-fund{display:block;width:100%;height:auto;cursor:zoom-in;border:1px solid var(--linea);border-radius:8px;background:#fff}
+.rp-pista i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:4px;vertical-align:0}
+.rp-pista i.intacta,.rp-fila .pt i.intacta{background:#5E8F45} .rp-pista i.bajo_presion,.rp-fila .pt i.bajo_presion{background:#E3B04B} .rp-pista i.en_vigilancia,.rp-fila .pt i.en_vigilancia{background:#A3A39B}
+.rp-cabtab,.rp-fila{display:grid;grid-template-columns:62px minmax(0,1fr) 64px 92px 96px;gap:12px;align-items:center}
+.rp-cabtab{margin-top:22px;padding:0 6px 6px;font:12px var(--sans);color:var(--gris)}
+.rp-cabtab span:nth-child(n+4){text-align:right}
+.rp-grupo{display:flex;justify-content:space-between;margin:22px 0 4px;padding:0 6px;font:500 13px var(--sans);color:var(--gris)}
+a.rp-fila{padding:12px 6px;border-top:1px solid var(--linea);text-decoration:none;color:var(--texto)}
+a.rp-fila:hover{background:var(--papel-2)}
+.rp-fila .tk{font:600 14px var(--sans)}
+.rp-fila .ti{font:17px/1.3 var(--serif)}
+.rp-fila .ti small{display:block;margin-top:3px;font:12px var(--sans);color:var(--gris)}
+.rp-fila .up{color:#3B6B2A} .rp-fila .dn{color:var(--rojo-t)}
+.rp-fila .pt{display:flex;gap:4px}
+.rp-fila .pt i{width:9px;height:9px;border-radius:50%;background:#EEE9E0}
+.rp-hoy{text-align:right;font:600 15px var(--sans);font-variant-numeric:tabular-nums}
+.rp-hoy small{display:block;font:400 11px var(--sans);color:var(--gris)}
+.rp-hoy.ok{color:#3B6B2A} .rp-hoy.medio{color:#9A6A12} .rp-hoy.bajo{color:var(--rojo-t)}
+.rp-fila .px{text-align:right;font:13px var(--sans);color:var(--gris)}
+.rp-cal{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px;padding-top:14px;border-top:1px solid var(--linea)}
+.rp-cal span{padding:3px 9px;border-radius:6px;background:var(--papel-2);font:12px var(--sans);color:var(--gris)}
+.rp-cal b{font-weight:600;color:var(--texto)}
+@media (max-width:720px){ .rp-cabtab{display:none} .rp-fila{grid-template-columns:minmax(0,1fr) 68px;gap:2px 10px} .rp-fila .tk{grid-column:1;font-size:12px;color:var(--gris)} .rp-fila .ti{grid-column:1} .rp-fila .rp-hoy{grid-column:2;grid-row:1 / span 2} .rp-fila .pt,.rp-fila .px{display:none} }
+.rp-cab{display:flex;justify-content:space-between;align-items:baseline;gap:8px 16px;flex-wrap:wrap}
+.rp-cab .fecha{font:15px var(--sans);color:var(--gris)}
+.rp-dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.rp-caja{background:var(--papel-2);border-radius:10px;padding:16px 18px}
+.rp-caja .et{font:14px var(--sans);color:var(--gris)}
+.rp-caja .v{margin-top:4px;font:600 24px/1.2 var(--sans)}
+.rp-caja .v.intacta{color:#3B6B2A} .rp-caja .v.bajo_presion{color:#9A6A12} .rp-caja .v.en_vigilancia{color:#5D5D55}
+.rp-caja .d{margin-top:6px;font:14px/1.4 var(--sans);color:var(--gris)}
+.rp-var{border-top:1px solid var(--linea)}
+.rp-var:last-of-type{border-bottom:1px solid var(--linea)}
+.rp-var summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:14px;min-height:52px;padding:8px 0;font:19px/1.3 var(--serif)}
+.rp-var summary::-webkit-details-marker{display:none}
+.rp-term{display:block;margin-top:2px;font:12px/1.35 var(--sans);color:var(--gris)}
+.rp-var .det{padding:0 0 16px;font:14px/1.5 var(--sans);color:var(--texto-2)}
+.rp-var .det p{margin:6px 0}
+.rp-var .det table{min-width:0;font-size:13px}
+.rp-var .det td,.rp-var .det th{padding:8px 6px}
+.rp-rompe{margin-top:10px;padding:8px 12px;border-left:3px solid var(--rojo-t);background:var(--rojo-f);border-radius:4px}
+.rp-est{display:inline-block;padding:4px 14px;border-radius:99px;font:500 14px var(--sans);white-space:nowrap}
+.rp-est.intacta{background:var(--verde-f);color:#3B6B2A} .rp-est.bajo_presion{background:#F6E2B8;color:#7A5510} .rp-est.en_vigilancia{background:#E9E8E3;color:#5D5D55} .rp-est.nada{background:#F0ECE4;color:var(--gris)}
+.rp-tiempo summary{list-style:none;cursor:pointer;padding:12px 0 2px;font:14px var(--sans);color:var(--gris)}
+.rp-tiempo summary::-webkit-details-marker{display:none}
+.rp-tiempo summary b{font-weight:400;color:var(--pizarra)}
+.rp-hecho{padding:12px 0;border-bottom:1px solid var(--linea);font:14px/1.5 var(--sans)}
+.rp-hecho .t{font-weight:600;color:var(--texto)}
+.rp-efecto{margin-top:6px;padding-left:10px;border-left:3px solid #E3B04B;color:var(--texto-2)}
+.rp-efecto.confirma{border-color:#5E8F45} .rp-efecto.no_toca{border-color:var(--linea-2)}
+.rp-eje{display:flex;gap:10px;align-items:center;padding:5px 0;font:17px/1.4 var(--serif)}
+.rp-eje i{flex:none;width:11px;height:11px;border-radius:50%}
+.rp-eje i.bien{background:#5E8F45} .rp-eje i.regular{background:#E3B04B} .rp-eje i.mal{background:var(--rojo-t)}
+.rp-promesa{margin:8px 0 0;font:14px/1.45 var(--sans);color:var(--gris)}
+.rp-viva{background:var(--papel-2);border-radius:10px;padding:18px 20px}
+.rp-fila2{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.rp-fila2 span{font:16px var(--serif)}
+.rp-fila2 strong{font:600 26px var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rp-escala{position:relative;height:58px;margin:12px 8px 4px}
+.rp-escala .barra{position:absolute;left:0;right:0;top:38px;height:5px;border-radius:3px;background:var(--linea)}
+.rp-escala .m{position:absolute;top:0;transform:translateX(-50%);font:11px/1.3 var(--sans);color:var(--gris);text-align:center;white-space:nowrap}
+.rp-escala .m::after{content:"";display:block;width:1px;height:10px;margin:2px auto 0;background:var(--linea-2)}
+.rp-escala .hoy{position:absolute;top:30px;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid var(--texto-2);transform:translateX(-50%)}
+.rp-nota{margin:10px 0 0;font:13px/1.45 var(--sans);color:var(--gris)}
+.rp-ins{margin-top:14px;padding:14px 16px;background:var(--papel-2);border-radius:10px}
+.rp-ins .tit{font:600 14px var(--sans);color:var(--texto)}
+.rp-ins .res{margin:4px 0 0;font:15px/1.45 var(--serif);color:var(--texto-2)}
+.rp-barras{display:flex;align-items:flex-end;gap:8px;height:110px;margin-top:12px}
+.rp-barras div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font:11px/1.3 var(--sans);color:var(--gris)}
+.rp-barras b{display:block;width:70%;max-width:42px;border-radius:3px 3px 0 0;background:#B8C9AE}
+.rp-barras div.ultimo b{background:#5E8F45} .rp-barras div.ultimo{color:var(--texto);font-weight:600}
+.rp-barras div.neg b{background:#E2C2B9} .rp-barras div.neg.ultimo b{background:var(--rojo-t)}
+.rp-barras em{font-style:normal;margin-bottom:3px}
+.rp-ins details summary{list-style:none;cursor:pointer;margin-top:10px;font:13px var(--sans);color:var(--pizarra)}
+.rp-ins details summary::-webkit-details-marker{display:none}
+.rp-ins table{min-width:0;margin-top:8px;font-size:13px} .rp-ins td,.rp-ins th{padding:6px} .rp-ins td:not(:first-child),.rp-ins th:not(:first-child){text-align:right}
+@media (max-width:720px){ .rp-tarjeta{padding:18px 16px} .rp-ag .f{flex-basis:76px} .rp-escala .m small{display:none} }
+/* ---------- Industrias visual (Jose, 16/11/2026): mapa, tarjetas con imagen y ficha dentro ---------- */
+.ind-resumen{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 0}
+.ind-resumen span{font:600 12px var(--sans);color:var(--texto-2);background:var(--papel-2);border:1px solid var(--linea);border-radius:99px;padding:5px 12px}
+.ind-resumen b{font:600 15px var(--sans);color:var(--texto);margin-right:4px}
+.ind-mapa{position:relative;margin:20px 0 0;background:radial-gradient(circle at 50% 40%,#fff 0,var(--papel-2) 75%);border:1px solid var(--linea);border-radius:14px;overflow:hidden}
+.ind-mapa svg{display:block;width:100%;height:auto;touch-action:manipulation}
+.ind-mapa .halo{opacity:.09}
+.ind-mapa .familia-txt{font:700 12px var(--sans);letter-spacing:.16em;text-transform:uppercase;opacity:.75}
+.ind-mapa .arista{fill:none;stroke-width:2.6;opacity:.55;transition:opacity .2s}
+.ind-mapa .arista--comun{stroke:#9C927F;stroke-dasharray:5 6;stroke-width:1.8;opacity:.6}
+.ind-mapa .arista-hit{fill:none;stroke:transparent;stroke-width:16;cursor:help}
+.ind-mapa .nodo{cursor:pointer;transition:opacity .2s}
+.ind-mapa .nodo circle.fondo{fill:#fff;stroke-width:3.5;filter:drop-shadow(0 3px 6px rgba(40,30,10,.18))}
+.ind-mapa .nodo:hover circle.fondo,.ind-mapa .nodo:focus circle.fondo{stroke-width:6}
+.ind-mapa .nodo text{font:600 15px var(--sans);fill:var(--texto);text-anchor:middle;paint-order:stroke;stroke:#FAF7F1;stroke-width:5px;stroke-linejoin:round}
+.ind-mapa .nodo text.sub{font:500 11px var(--sans);fill:var(--gris)}
+.ind-mapa.foco .nodo,.ind-mapa.foco .arista{opacity:.12}
+.ind-mapa.foco .nodo.on{opacity:1} .ind-mapa.foco .arista.on{opacity:.95}
+.ind-pista{min-height:52px;padding:12px 16px;border-top:1px solid var(--linea);background:rgba(255,255,255,.75);font:14px/1.45 var(--sans);color:var(--texto-2)}
+.ind-pista b{color:var(--texto)}
+.ind-leyenda{display:flex;flex-wrap:wrap;gap:14px;margin:10px 2px 0;font:12px var(--sans);color:var(--gris)}
+.ind-leyenda i{display:inline-block;width:22px;height:0;border-top:2.6px solid #6E6557;vertical-align:middle;margin-right:6px}
+.ind-leyenda i.comun{border-top:1.8px dashed #9C927F}
+.ind-filtros{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+.ind-filtros button{min-height:36px;padding:0 14px;border-radius:99px;border:1px solid var(--linea-2);background:#fff;font:600 12px var(--sans);color:var(--texto-2);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.ind-filtros button[aria-pressed=true]{background:var(--texto);border-color:var(--texto);color:#fff}
+.ind-filtros button i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.ind-rejilla{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:22px}
+.ind-tarjeta{min-width:0;display:flex;flex-direction:column;background:#fff;border:1px solid var(--linea);border-radius:12px;overflow:hidden;text-decoration:none;color:var(--texto);transition:transform .15s,box-shadow .15s}
+.ind-tarjeta:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(40,30,10,.12);color:var(--texto)}
+.ind-tarjeta .imagen{position:relative;aspect-ratio:16/9;background:#fff;border-bottom:1px solid var(--linea);overflow:hidden}
+.ind-tarjeta .imagen img{width:100%;height:100%;object-fit:contain;padding:34px 10px 6px;box-sizing:border-box;display:block}
+.ind-tarjeta .imagen .ilustra{width:100%;height:100%;display:block}
+.ind-tarjeta .sello{position:absolute;left:12px;top:12px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 6px;border-radius:99px;color:#fff;font:700 10.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.ind-tarjeta .sello svg{width:16px;height:16px}
+.ind-tarjeta .cuerpo{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.ind-tarjeta h3{margin:0;font:400 23px/1.15 var(--titular)}
+.ind-tarjeta .ind-gics{margin:-2px 0 0;font:12px/1.35 var(--sans);color:var(--gris)} .ind-tarjeta .ind-gics b{font-weight:600;color:var(--texto-2)}
+.ind-heroe .ind-cubre{margin:10px 0 0;font:13.5px/1.45 var(--sans);color:rgba(255,255,255,.85);max-width:820px}
+.ind-tarjeta .tit{margin:0;font:italic 400 15px/1.3 var(--titular);color:var(--texto-2)}
+.ind-cifras{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:4px}
+.ind-cifras div{background:var(--papel);border-radius:8px;padding:8px 8px 7px}
+.ind-cifras b{display:block;font:600 19px/1.15 var(--sans);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.ind-cifras span{display:block;margin-top:3px;font:11px/1.25 var(--sans);color:var(--gris)}
+.ind-tarjeta .pie{margin-top:auto;padding-top:10px;border-top:1px solid #EFE8DB;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font:11.5px var(--sans);color:var(--gris)}
+.ind-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font:600 11.5px var(--sans);text-decoration:none;border:1px solid}
+.ind-terceros{margin-top:40px;border:1px solid var(--linea);border-radius:12px;background:var(--papel-2)}
+.ind-terceros>summary{cursor:pointer;list-style:none;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;font:600 14px var(--sans);color:var(--texto)}
+.ind-terceros>summary::-webkit-details-marker{display:none}
+.ind-terceros>summary small{display:block;font:400 12.5px var(--sans);color:var(--gris);margin-top:2px}
+.ind-terceros>summary:after{content:"+";font:300 26px/1 var(--sans);color:var(--gris)}
+.ind-terceros[open]>summary:after{content:"−"}
+.ind-terceros .filas{padding:0 18px 14px}
+.ind-tercero{display:grid;grid-template-columns:1fr auto;gap:6px 14px;align-items:center;padding:11px 0;border-top:1px solid var(--linea)}
+.ind-tercero .t{font:400 16px/1.3 var(--titular)}
+.ind-tercero .m{font:12px var(--sans);color:var(--gris);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ind-tercero .boton{grid-row:span 2}
+.ind-heroe{position:relative;margin-top:14px;border-radius:14px;overflow:hidden;color:#fff;padding:26px 26px 24px}
+.ind-heroe .patron{position:absolute;inset:0;opacity:.16}
+.ind-heroe>*:not(.patron){position:relative}
+.ind-heroe .rotulo{color:rgba(255,255,255,.85);display:flex;align-items:center;gap:8px}
+.ind-heroe .rotulo svg{width:18px;height:18px}
+.ind-heroe h1{color:#fff;margin-top:10px;max-width:880px}
+.ind-heroe .entradilla{color:rgba(255,255,255,.9);max-width:820px}
+.ind-heroe .botones{margin-top:18px}
+.ind-heroe .boton{background:#fff;color:var(--texto)} .ind-heroe .boton:hover{background:var(--papel-2);color:var(--texto)}
+.ind-heroe .boton--suave{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.4)}
+.ind-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(190px,100%),1fr));gap:12px;margin-top:18px}
+.ind-tiles div{background:#fff;border:1px solid var(--linea);border-radius:10px;padding:13px 14px;border-top:4px solid}
+.ind-tiles b{display:block;font:600 24px/1.1 var(--sans);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.ind-tiles span{display:block;margin-top:4px;font:600 13px/1.3 var(--sans)}
+.ind-tiles small{display:block;margin-top:5px;font:12px/1.4 var(--sans);color:var(--gris)}
+.ind-donde{margin-top:16px;padding:14px 18px;border-left:4px solid;border-radius:8px;background:#fff;font-size:15.5px;line-height:1.5;color:var(--texto-2)}
+.ind-galeria{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(420px,100%),1fr));gap:14px;margin-top:14px}
+.ind-galeria figure{margin:0;background:#fff;border:1px solid var(--linea);border-radius:10px;padding:10px;cursor:zoom-in}
+.ind-galeria img{width:100%;height:auto;display:block;border-radius:4px}
+.ind-galeria figcaption{margin-top:8px;font:12.5px/1.35 var(--sans);color:var(--texto-2)}
+.ind-conex{display:grid;grid-template-columns:minmax(240px,340px) 1fr;gap:18px;align-items:center;margin-top:14px}
+.ind-conex .mini{background:#fff;border:1px solid var(--linea);border-radius:12px}
+.ind-conex .mini svg{display:block;width:100%;height:auto}
+.ind-conex .mini text{font:600 13px var(--sans);fill:var(--texto);text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:4px}
+.ind-conex ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.ind-conex li{display:flex;gap:10px;align-items:flex-start;font:14px/1.45 var(--sans);color:var(--texto-2)}
+.ind-conex li .ind-chip{flex:none;margin-top:1px}
+.marco-ficha{display:block;width:100%;border:1px solid var(--linea);border-radius:12px;background:#fff;margin-top:14px;min-height:400px}
+@media (max-width:720px){.ind-conex{grid-template-columns:1fr} .ind-heroe{padding:20px 18px} .ind-cifras b{font-size:15px} .ind-rejilla{grid-template-columns:1fr}}
+/* ---------- Mapa del mercado (Jose, 16/11/2026): las 74 industrias GICS, portada de Industrias (solo privada) ---------- */
+.mm-vistas{display:inline-flex;margin-top:18px;padding:3px;border:1px solid var(--linea-2);border-radius:99px;background:#fff}
+.mm-vistas a{min-height:36px;display:inline-flex;align-items:center;padding:0 16px;border-radius:99px;font:600 13px var(--sans);color:var(--texto-2);text-decoration:none}
+.mm-vistas a[aria-current=page]{background:var(--texto);color:#fff}
+.mm-leyenda{display:flex;flex-wrap:wrap;gap:8px 16px;margin:16px 0 0;font:12.5px var(--sans);color:var(--texto-2)}
+.mm-leyenda span{display:inline-flex;align-items:center;gap:7px}
+.mm-leyenda i{width:14px;height:14px;border-radius:3px;display:inline-block}
+.mm-leyenda b{font-weight:600;color:var(--texto)}
+.mm-leyenda .punto i{width:9px;height:9px;border-radius:50%;background:var(--texto);box-shadow:0 0 0 2px #fff,0 0 0 3px var(--texto)}
+.mm-cuerpo{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start;margin-top:14px}
+.mm-lienzo{position:relative;width:100%;background:var(--papel-2);border:1px solid var(--linea);border-radius:10px;overflow:hidden}
+.mm-sector{position:absolute;box-sizing:border-box}
+.mm-sector>.t{position:absolute;left:4px;right:4px;top:2px;font:700 10px/16px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--gris);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mm-caja{position:absolute;box-sizing:border-box;border:0;border-radius:3px;padding:5px 6px;margin:0;text-align:left;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;gap:1px;font-family:var(--sans);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);transition:filter .12s}
+.mm-caja:hover{filter:brightness(1.07)}
+.mm-caja.on{box-shadow:inset 0 0 0 3px var(--texto),0 0 0 1px #fff;z-index:2}
+.mm-caja .n{font:600 11.5px/1.2 var(--sans);overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;hyphens:auto;-webkit-hyphens:auto}
+.mm-caja.con-punto{padding-right:16px}
+.mm-caja.grande .n{font-size:14px}
+.mm-caja .p{font:500 11px/1.2 var(--sans);opacity:.85;font-variant-numeric:tabular-nums}
+.mm-caja .pt{position:absolute;right:5px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--texto);box-shadow:0 0 0 2px #fff}
+.mm-panel{position:sticky;top:16px;background:#fff;border:1px solid var(--linea);border-radius:12px;padding:18px 18px 20px;font:14px/1.5 var(--sans);color:var(--texto-2)}
+.mm-panel h3{margin:6px 0 0;font:400 25px/1.15 var(--titular);color:var(--texto)}
+.mm-panel .en{margin-top:3px;font:12px var(--sans);color:var(--gris)}
+.mm-panel .estado-ficha{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:3px 10px;border-radius:99px;font:600 12px var(--sans)}
+.mm-panel .estado-ficha i{width:9px;height:9px;border-radius:50%}
+.mm-panel .bloque{margin-top:16px;padding-top:12px;border-top:1px solid #EFE8DB}
+.mm-panel .bloque>.rotulo{margin-bottom:6px}
+.mm-panel .peso b{font:600 26px/1.1 var(--sans);color:var(--texto);font-variant-numeric:tabular-nums}
+.mm-panel .chips{display:flex;flex-wrap:wrap;gap:6px}
+.mm-panel .chips a,.mm-panel .chips span{display:inline-flex;align-items:center;min-height:30px;padding:0 10px;border-radius:99px;font:600 12px var(--sans);text-decoration:none;border:1px solid var(--pizarra-borde);background:var(--pizarra-suave);color:var(--pizarra-osc)}
+.mm-panel .chips span{background:var(--papel);border-color:var(--linea);color:var(--texto-2);font-weight:500}
+.mm-panel .chips small{font-weight:400;color:var(--gris);margin-left:5px}
+.mm-panel ul.subs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.mm-panel ul.subs b{display:block;color:var(--texto);font-weight:600}
+.mm-panel .botones{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}
+.mm-panel .boton[aria-disabled=true]{background:var(--papel-2);color:var(--gris);border:1px solid var(--linea);cursor:default}
+.mm-panel .cuenta{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;margin-top:12px}
+.mm-panel .cuenta i{width:14px;height:14px;border-radius:3px;display:inline-block;margin-top:3px}
+.mm-pie{margin-top:12px;font:12px/1.5 var(--sans);color:var(--gris)}
+@media (max-width:900px){.mm-cuerpo{grid-template-columns:1fr} .mm-panel{position:static}}
+</style>
+</head>
+<body>
+
+<div id="entrada">
+  <form id="formulario" autocomplete="off">
+    <div class="marca">Walker</div>
+    <div class="rotulo" style="margin-top:10px">Investigar, decidir y acumular criterio</div>
+    <div class="sello-privado" hidden data-privado>Privado</div>
+    <label for="clave" id="etiqueta-clave">Contraseña de suscriptor</label>
+    <input id="clave" name="clave" type="password" required autocomplete="current-password">
+    <label class="recordar"><input id="recordar" type="checkbox" checked> Recordar en este dispositivo</label>
+    <button class="boton" type="submit" id="entrar">Entrar</button>
+    <div id="error" role="alert"></div>
+  </form>
+</div>
+
+<div id="app" class="marco" hidden>
+  <nav class="lateral" aria-label="Secciones del terminal">
+    <div>
+      <div class="marca">Walker</div>
+      <div class="lema">Investigar, decidir y acumular criterio</div>
+      <div class="sello-privado" hidden data-privado>Privado</div>
+    </div>
+    <div class="menu" id="menu"></div>
+    <div class="pie">
+      <p class="mano" style="font-size:19px">«¿Es esta una buena inversión a este precio, en este momento y frente a las alternativas?»</p>
+      <button class="salir" type="button" id="salir">Salir y olvidar este dispositivo</button>
+    </div>
+  </nav>
+  <main><div class="ancho" id="contenido"></div></main>
+</div>
+
+<script>
+'use strict';
+// Si GitHub Pages o el navegador sirven una versión vieja de esta página,
+// version.json (que nunca se guarda en caché) lo delata y se recarga con
+// una dirección nueva. El generador pone la huella al publicar.
+const VERSION_WEB = '935f66ebd1c0';
+fetch('version.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
+  if (v && v.web && v.web !== VERSION_WEB && !location.search.includes(v.web)) {
+    location.replace(location.pathname + '?v=' + v.web + location.hash);
+  }
+}).catch(() => {});
+
+// El generador la pone a true en la salida privada (--salida-privada). Las dos
+// webs comparten origen (herrvak-code.github.io): cada una guarda su llave con
+// un nombre distinto o se pisan.
+const SALIDA_PRIVADA = true;
+const ALMACEN = SALIDA_PRIVADA ? 'walker-privado-llave-v1' : 'walker-llave-v1';
+if (SALIDA_PRIVADA) {
+  document.title = 'Walker · Privado';
+  document.querySelectorAll('[data-privado]').forEach(n => { n.hidden = false; });
+  document.getElementById('etiqueta-clave').textContent = 'Tu contraseña';
+}
+let llave = null, llaveB64 = '', datos = null;
+const urls = {};
+
+// ---------- cifrado ----------
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const a64 = b => btoa(String.fromCharCode(...new Uint8Array(b)));
+
+async function derivar(clave) {
+  const cfg = await (await fetch('clave.json', { cache: 'no-store' })).json();
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(clave), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64(cfg.sal), iterations: cfg.iteraciones, hash: 'SHA-256' },
+    base, { name: 'AES-GCM', length: 256 }, true, ['decrypt']);
+}
+async function descifrar(buf) {
+  const b = new Uint8Array(buf);
+  return crypto.subtle.decrypt({ name: 'AES-GCM', iv: b.slice(0, 12) }, llave, b.slice(12));
+}
+async function cargarDatos() {
+  const r = await fetch('c/datos.bin', { cache: 'no-store' });
+  if (!r.ok) throw new Error('sin datos');
+  datos = JSON.parse(new TextDecoder().decode(await descifrar(await r.arrayBuffer())));
+}
+async function urlDe(id, tipo) {
+  if (!urls[id]) {
+    const r = await fetch('c/' + id + '.bin');
+    let claro = await descifrar(await r.arrayBuffer());
+    // Salida privada (08/11/2026): algunos ficheros van comprimidos con gzip (la biblioteca).
+    if ((datos.comprimidos || []).includes(id))
+      claro = await new Response(new Blob([claro]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+    urls[id] = URL.createObjectURL(new Blob([claro], { type: tipo }));
+  }
+  return urls[id];
+}
+// El PDF lo descarga y descifra la propia pestaña nueva, que es la que está
+// en primer plano: en el móvil, Safari congela la pestaña del terminal en
+// cuanto se abre la otra, y si el trabajo se hiciera aquí no terminaría
+// hasta volver a ella (el fallo de «al primer clic no abre»).
+function abrirPdf(id, tipo) {
+  // Desde el 16/11/2026 también abre las fichas HTML de industria (tipo text/html, a veces comprimidas).
+  tipo = tipo || 'application/pdf';
+  const ventana = window.open('', '_blank');
+  if (!ventana) { urlDe(id, tipo).then(u => { location.href = u; }); return; }
+  const dato = JSON.stringify({ k: llaveB64, u: new URL('c/' + id + '.bin', location.href).href, t: tipo, z: (datos.comprimidos || []).includes(id) });
+  ventana.document.write(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Walker · documento</title><body style="font:16px/1.5 system-ui,sans-serif;padding:2em;color:#1B1712;background:#FAF7F1">
+<p id="m">Abriendo el documento…</p><script>
+(async () => {
+  const m = document.getElementById('m'), d = ${dato.replace(/</g, '\\u003c')};
+  try {
+    const k = await crypto.subtle.importKey('raw', Uint8Array.from(atob(d.k), c => c.charCodeAt(0)), { name: 'AES-GCM' }, false, ['decrypt']);
+    const r = await fetch(d.u);
+    if (!r.ok) throw new Error(r.status);
+    const b = new Uint8Array(await r.arrayBuffer());
+    let claro = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b.slice(0, 12) }, k, b.slice(12));
+    if (d.z) claro = await new Response(new Blob([claro]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+    const url = URL.createObjectURL(new Blob([claro], { type: d.t }));
+    // Si el navegador no se deja llevar al PDF, queda un enlace para tocar.
+    setTimeout(() => { m.innerHTML = '<a href="' + url + '" style="color:#2E5F73">Abrir el documento</a>'; }, 2500);
+    location.replace(url);
+  } catch (e) {
+    m.textContent = 'No se ha podido abrir el documento. Cierra esta pestaña y vuelve a intentarlo; si sigue sin abrir, sal del terminal y vuelve a entrar.';
+  }
+})();
+<\/script>`);
+  ventana.document.close();
+}
+
+// ---------- entrada ----------
+document.getElementById('formulario').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const boton = document.getElementById('entrar'), error = document.getElementById('error');
+  boton.disabled = true; boton.textContent = 'Comprobando…'; error.textContent = '';
+  try {
+    llave = await derivar(document.getElementById('clave').value);
+    await cargarDatos();
+    llaveB64 = a64(await crypto.subtle.exportKey('raw', llave));
+    if (document.getElementById('recordar').checked) {
+      try { localStorage.setItem(ALMACEN, llaveB64); } catch (e) {}
+    }
+    arrancar();
+  } catch (e) {
+    llave = null; error.textContent = SALIDA_PRIVADA ? 'Contraseña incorrecta. Es la del llavero «walker-cuaderno».'
+      : 'Contraseña incorrecta. Está en el último post para suscriptores.';
+  } finally { boton.disabled = false; boton.textContent = 'Entrar'; }
+});
+document.getElementById('salir').addEventListener('click', () => {
+  try { localStorage.removeItem(ALMACEN); } catch (e) {}
+  location.hash = ''; location.reload();
+});
+(async () => {
+  let guardada = null;
+  try { guardada = localStorage.getItem(ALMACEN); } catch (e) {}
+  if (!guardada) return;
+  try {
+    llave = await crypto.subtle.importKey('raw', b64(guardada), { name: 'AES-GCM' }, true, ['decrypt']);
+    await cargarDatos(); llaveB64 = guardada; arrancar();
+  } catch (e) { llave = null; try { localStorage.removeItem(ALMACEN); } catch (_) {} }
+})();
+
+function arrancar() {
+  document.getElementById('entrada').hidden = true;
+  document.getElementById('app').hidden = false;
+  window.addEventListener('hashchange', pintar);
+  pintar();
+}
+
+// ---------- utilidades ----------
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const SEM = { 'verde': 'verde', 'ámbar': 'ambar', 'ambar': 'ambar', 'rojo': 'rojo' };
+const claseEstado = e => 'estado--' + (SEM[String(e || '').toLowerCase()] || 'nada');
+function todas() {
+  const lista = [];
+  datos.estrategias.forEach(e => e.empresas.forEach(x => lista.push({ x, origen: e.titulo, ruta: '#/estrategias/' + e.id })));
+  datos.watchlist.forEach(x => lista.push({ x, origen: 'Watchlist', ruta: '#/watchlist' }));
+  return lista;
+}
+function ndocs(x) { return x.tesis.length + (x.complementos || []).length + x.trimestres.reduce((n, t) => n + t.docs.length, 0); }
+function ultimo(x) {
+  const t = x.trimestres[0];
+  if (!t) return 'sin seguimientos todavía';
+  return t.periodo + ' · ' + t.docs.map(d => d.tipo.toLowerCase()).join(' y ');
+}
+function boton(f, texto, clase) {
+  return `<button type="button" class="boton ${clase || ''}" data-pdf="${esc(f)}">${esc(texto)}</button>`;
+}
+function foto(x) {
+  if (!x.foto) return '';
+  return `<img class="pegada" data-img="${esc(x.foto)}" alt="${esc(x.pie_foto || x.nombre)}">`;
+}
+
+// ---------- secciones ----------
+const MENU = [
+  ['Análisis', [['vision', 'Visión', 'En qué entorno estamos'], ['estrategias', 'Estrategias', 'Dividendos, QGV y Alpha'], ['repaso', 'Repaso', 'Qué ha pasado en cada tesis'], ['watchlist', 'Watchlist', 'Lo que sigo de cerca'], ['industrias', 'Industrias', 'Cómo funciona cada sector'], ['tuberias', 'Tuberías', 'Cómo fluye el dinero']]],
+  ['Mi cartera', [['cartera', 'Cartera', 'Pesos y movimientos']]],
+  ['Recursos', [['metodo', 'Método', 'Cómo trabajo'], ['recursos', 'Lecturas', 'Lo que merece la pena leer']]],
+  ['Biblioteca', [['biblioteca', 'Biblioteca', 'Lo que dicen otros'], ['radar', 'Radar', 'Lo entrado esta semana']]]
+];
+
+function pintar() {
+  const partes = location.hash.replace(/^#\/?/, '').split('/');
+  const seccion = partes[0] || 'vision';
+  // En la página de una empresa se marca la pestaña de la que viene.
+  let marcada = seccion;
+  if (seccion === 'empresa') {
+    const r = todas().find(o => o.x.id === partes[1]);
+    marcada = r && r.origen === 'Watchlist' ? 'watchlist' : 'estrategias';
+  }
+  if (seccion === 'otros') marcada = 'biblioteca';
+  // Sin cartera en los datos (salida pública, 08/11/2026) no se enseña el grupo «Mi cartera».
+  // El grupo Biblioteca solo existe con datos.privado (salida privada, 08/11/2026).
+  // Repaso (09/11/2026): solo si alguna empresa tiene repaso en esta salida.
+  const hay = id => id === 'cartera' ? datos.cartera : (id === 'biblioteca' || id === 'radar') ? datos.privado
+    : id === 'repaso' ? conRepaso().length
+    // Pestañas vacías (17/11/2026, Jose: la pública solo lleva Visión, estrategias y repaso): no se enseñan.
+    : id === 'metodo' ? datos.metodo : id === 'recursos' ? (datos.lecturas || []).length
+    : id === 'watchlist' ? (datos.watchlist || []).length : id === 'industrias' ? (datos.industrias || []).length : id === 'tuberias' ? (datos.tuberias_mapa || (datos.tuberias || []).length) : true;
+  const menu = MENU.map(([g, items]) => [g, items.filter(([id]) => hay(id))]).filter(([, items]) => items.length);
+  document.getElementById('menu').innerHTML = menu.map(([g, items]) =>
+    `<div class="grupo">${esc(g)}</div>` + items.map(([id, t, s]) => {
+      const activa = id === marcada;
+      return `<a class="item" href="#/${id}"${activa ? ' aria-current="page"' : ''}><span>${esc(t)}</span><small>${esc(s)}</small></a>`;
+    }).join('')).join('');
+  const vistas = { vision, estrategias, watchlist, empresa, cartera, metodo, recursos, repaso, industrias, tuberias };
+  if (datos.privado) Object.assign(vistas, { biblioteca, radar, otros });
+  let html;
+  try { html = (vistas[seccion] || vision)(partes[1], partes.slice(1)); }
+  catch (e) { console.error(e); html = '<h1>Esta sección no se ha podido mostrar</h1><p class="entradilla">Es un fallo del terminal, no de tu conexión. Vuelve a intentarlo más tarde.</p>'; }
+  document.getElementById('contenido').innerHTML = html + avisoLegal();
+  window.scrollTo(0, 0);
+  document.querySelectorAll('[data-pdf]').forEach(b => b.addEventListener('click', () => abrirPdf(b.dataset.pdf, b.dataset.tipo)));
+  document.querySelectorAll('img[data-img]').forEach(async img => { img.src = await urlDe(img.dataset.img, img.dataset.tipo || 'image/jpeg'); });
+  document.querySelectorAll('img.rp-fund').forEach(img => img.addEventListener('click', () => { if (img.src) window.open(img.src, '_blank'); }));
+  const marco = document.querySelector('iframe[data-edicion]');
+  if (marco) cargarEdicion(marco);
+  if (seccion === 'industrias') activarIndustrias();
+  if (seccion === 'tuberias') activarTuberias();
+}
+
+function avisoLegal() {
+  return '<p class="aviso-legal">Contenido con fines exclusivamente informativos y de análisis personal. No es asesoramiento financiero ni una recomendación personalizada de compra o venta. Invertir conlleva riesgo de pérdida del capital.</p>';
+}
+
+function vision(fecha) {
+  const v = (fecha && datos.vision.find(x => x.fecha === fecha)) || datos.vision[0];
+  if (!v) return '<div class="rotulo">Visión</div><h1>La primera lectura llega pronto</h1>';
+  const capas = (v.capas || []).map(c => `<div class="capa"><span class="rotulo" style="font-size:10px">${esc(c.capa)}</span><span class="estado ${claseEstado(c.estado)}">${esc(c.estado || 'Sin asignar')}</span><span class="motivo">${esc(c.motivo)}</span></div>`).join('');
+  const e = v.entorno;
+  const entorno = e ? `<div class="caja"><div class="rotulo" style="color:var(--pizarra)">Qué entorno es este</div>
+      ${e.favorece ? `<p><strong>Favorece</strong> ${esc(e.favorece)}</p>` : ''}
+      ${e.penaliza ? `<p><strong>Penaliza</strong> ${esc(e.penaliza)}</p>` : ''}
+      ${e.cambiaria ? `<p><strong>Cambiaría si</strong> ${esc(e.cambiaria)}</p>` : ''}</div>` : '';
+  const pdf = v.pdf ? `<div style="margin-top:22px">${boton(v.pdf, 'Descargar el informe completo (PDF)')}</div>` : '<p class="nota-gris" style="margin-top:18px">El informe completo en PDF se publica desde la próxima edición.</p>';
+  const otras = datos.vision.filter(x => x !== v);
+  const archivo = otras.length ? `<h2>Semanas anteriores</h2><div class="lista-semanas">${otras.map(x => `<a href="#/vision/${esc(x.fecha)}"><span>${esc(x.semana || '')} · ${esc(x.fecha.split('-').reverse().join('/'))} · ${esc(x.titular)}</span><span>${x.pdf ? 'Informe (PDF)' : 'Resumen'}</span></a>`).join('')}</div>` : '';
+  return `<div class="cabecera rotulo"><span>Visión · lectura macro semanal</span><span>${esc(v.semana || '')} · corte al ${esc(v.fecha.split('-').reverse().join('/'))}</span></div>
+    <h1>${esc(v.titular)}</h1>
+    ${v.frase ? `<p class="mano" style="margin:14px 0 0;font-size:24px">${esc(v.frase)}</p>` : ''}
+    <div class="capas">${capas}</div>
+    <div class="dos"><div><h2>La lectura</h2><p style="margin:0">${esc(v.lectura)}</p>${pdf}</div>${entorno}</div>
+    ${archivo}`;
+}
+
+function tarjeta(x, conEtiqueta) {
+  return `<article class="tarjeta">
+    ${x.foto ? `<div class="foto">${foto(x)}<p class="pie-foto mano">${esc(x.pie_foto)}</p></div>` : ''}
+    <div class="cuerpo">
+      ${conEtiqueta ? `<span class="etiqueta">${esc(x.etiqueta)}</span>` : ''}
+      <h3>${esc(x.nombre)} <small>${esc(x.ticker)}</small></h3>
+      <p class="desc">${esc(x.descripcion)}</p>
+      ${x.titular ? `<p class="titular-tesis">«${esc(x.titular)}»</p>` : ''}
+      <div class="acciones">
+        <div class="ultimo"><b>Último trimestre · </b>${esc(ultimo(x))}</div>
+        <div class="botones">${boton(x.tesis[0].f, 'Tesis · ' + x.tesis[0].fecha, 'boton--peq')}
+          <a class="boton boton--suave boton--peq" href="#/empresa/${esc(x.id)}">Todos los documentos (${ndocs(x)})</a></div>
+      </div>
+    </div></article>`;
+}
+
+function estrategias(id) {
+  const e = datos.estrategias.find(x => x.id === id) || datos.estrategias[0];
+  const pastillas = datos.estrategias.map(x => `<a href="#/estrategias/${x.id}"${x === e ? ' aria-current="page"' : ''}>${esc(x.titulo)}</a>`).join('');
+  const rejilla = e.empresas.length ? `<div class="rejilla">${e.empresas.map(x => tarjeta(x, false)).join('')}</div>`
+    : '<p class="vacio">Todavía no hay ninguna tesis publicada en esta estrategia.</p>';
+  return `<div class="rotulo">Estrategias · empresas en cartera</div><h1>${esc(e.titulo)}</h1><p class="entradilla">${esc(e.vara)}</p>
+    <div class="pastillas" role="navigation" aria-label="Estrategia">${pastillas}</div>${tablaEstrategia(e)}
+    <h2>Tesis disponibles</h2>${rejilla}
+    ${e.tambien ? `<p class="tambien"><span class="rotulo" style="font-size:10px">También en cartera, con su tesis en camino · </span>${esc(e.tambien)}</p>` : ''}`;
+}
+
+function fechaMercado(valor) {
+  if (!valor) return 'Sin fecha';
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(valor)) return valor;
+  const d = new Date(valor);
+  return Number.isNaN(d.getTime()) ? 'Sin fecha' : d.toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid' });
+}
+// Rediseño del 06/11/2026 (opción B): ranking por rentabilidad, de mayor a menor,
+// con una barra por empresa y la marca del 15 %. Mismos datos que la tabla anterior.
+const claseTir = r => r == null ? 'cifra-tir cifra-tir--nada' : 'cifra-tir' + (r < 0 ? ' cifra-tir--negativa' : '');
+function fuenteValoracion(v) {
+  return v ? `<button type="button" class="fuente-valoracion" data-pdf="${esc(v.documento)}">${v.tipo === 'seguimiento' ? 'Seguimiento' : 'Tesis'} ${fechaMercado(v.fecha)} · p. ${esc(v.pagina)}</button>` : '';
+}
+// Texto neutro a propósito: un plazo o un calendario en revisión no se describe
+// al suscriptor (Jose, 06/11/2026). Solo se distingue si hay o no valoración.
+function motivoPendiente(x) {
+  return x.valoracion ? 'en revisión' : 'sin valoración publicada';
+}
+// Horizonte de la rentabilidad (redacción de la sesión del calendario de la TIR, 06/11/2026):
+// Quality vende al publicarse las cuentas de 2030. En las demás se deduce de horizonte_anos:
+// «a cinco años» solo si todas las valoraciones con rentabilidad tienen cinco años.
+const HORIZONTE = { qgv: ['hasta la publicación de las cuentas de 2030', 'hasta 2031'] };
+function horizonte(id) {
+  if (HORIZONTE[id]) return HORIZONTE[id];
+  const e = datos.estrategias.find(x => x.id === id);
+  const todas5 = (e && e.tabla || []).filter(x => x.retorno != null).every(x => x.valoracion.horizonte_anos === 5);
+  return todas5 ? ['a cinco años', '5 años'] : ['hasta la venta de cada modelo', 'hasta la venta'];
+}
+const horizonteLargo = id => horizonte(id)[0];
+const horizonteCorto = id => horizonte(id)[1];
+function pesoEnEstrategia(e, ticker) {
+  const c = datos.cartera && datos.cartera.estrategias.find(x => x.estrategia === e.titulo);
+  const p = c && ticker && c.empresas.find(x => x.ticker === ticker);
+  return p ? p.peso : null;
+}
+function tablaEstrategia(e) {
+  const filas = [...(e.tabla || [])];
+  if (!filas.length) return '<p class="vacio">Todavía no hay datos de seguimiento para esta estrategia.</p>';
+  const con = filas.filter(x => x.retorno != null).sort((a, b) => b.retorno - a.retorno);
+  const sin = filas.filter(x => x.retorno == null);
+  const nombres = new Set(e.empresas.map(x => x.ticker));
+  const enlace = x => nombres.has(x.ticker) ? `<a class="nombre-empresa" href="#/empresa/${encodeURIComponent(x.ticker)}">${esc(x.empresa)}</a>`
+    : x.bib && datos.privado ? `<a class="nombre-empresa" href="#/otros/${encodeURIComponent(x.bib)}">${esc(x.empresa)}</a>`
+    : `<span class="nombre-empresa">${esc(x.empresa)}</span>`;
+  // Escala de las barras: de 0 a 20 %, o hasta la mayor rentabilidad si la supera.
+  const tope = Math.max(0.20, ...con.map(x => x.retorno));
+  const cuerpo = con.map(x => {
+    const v = x.valoracion, peso = pesoEnEstrategia(e, x.ticker);
+    const rango = x.min_52 != null && x.max_52 != null && x.max_52 > x.min_52;
+    const punto = rango ? Math.max(0, Math.min(100, (x.precio-x.min_52)/(x.max_52-x.min_52)*100)) : 0;
+    const ancho = Math.max(0, Math.min(100, x.retorno / tope * 100));
+    return `<div class="fila"><div>${enlace(x)}<small>${esc(x.ticker)}${x.sector ? ' · ' + esc(x.sector) : ''}${peso != null ? ' · ' + pct(peso) + ' de la estrategia' : ''}</small></div>
+      <div class="medida"><span class="${claseTir(x.retorno)}">${pct(x.retorno)}</span><div class="pista" role="img" aria-label="Rentabilidad ${pct(x.retorno)} frente al 15 %"><b style="width:${ancho}%"></b><span class="vara" style="left:${0.15 / tope * 100}%"><em>15 %</em></span></div></div>
+      <div class="datos">Hoy <strong>${precio(x.precio)}</strong> → objetivo <strong>${precio(v.objetivo)}</strong> ${esc(x.moneda)}
+        <small>Precio para el 15 % anual: ${precio(x.precio_15)} · ${esc(v.metodo)}${v.fecha_objetivo ? ' · ' + esc(v.fecha_objetivo) : ''}</small>
+        ${rango ? `<small><span class="rango-52" role="img" aria-label="Precio entre mínimo ${precio(x.min_52)} y máximo ${precio(x.max_52)} de 52 semanas"><span style="left:${punto}%"></span></span>52 sem. ${precio(x.min_52)} – ${precio(x.max_52)}</small>` : ''}
+        <small>Precio a ${fechaMercado(x.fecha_precio)}${!x.actualizado ? ' (dato guardado)' : ''} · resultados por confirmar</small>
+        ${fuenteValoracion(v)}</div></div>`;
+  }).join('');
+  const pendientes = sin.length ? `<div class="pendientes"><strong>Sin rentabilidad todavía</strong> · ${sin.map(x => {
+    return `${enlace(x).replace('nombre-empresa', '')} <span class="nota-gris">(${esc(motivoPendiente(x))})</span>`;
+  }).join(' · ')}</div>` : '';
+  return `<div class="panel ranking"><div class="panel-cab"><h2>Rentabilidad esperada</h2><span class="nota-gris">TIR total anual ${esc(horizonteLargo(e.id))} · de mayor a menor · la línea marca el 15 %</span></div>
+    ${cuerpo}${pendientes}</div>
+    <div class="notas-tabla"><p>Rentabilidad total: TIR con los dividendos por acción y el precio de venta del caso central del maestro. Precio para el 15 %: precio al que la TIR del caso central, con los mismos dividendos y la misma venta, sería del 15 %.</p>
+    <p>Caso central de la última valoración publicada, incluida una revisión posterior en un seguimiento. Cada objetivo enlaza a su documento de origen. Las empresas sin valoración publicada o con la valoración en revisión aparecen en «Sin rentabilidad todavía».</p></div>`;
+}
+
+function watchlist() {
+  const rejilla = datos.watchlist.length ? `<div class="rejilla">${datos.watchlist.map(x => tarjeta(x, true)).join('')}</div>`
+    : '<p class="vacio">Todavía no hay ninguna tesis publicada en la watchlist.</p>';
+  return `<div class="rotulo">Watchlist · empresas que sigo sin tenerlas</div><h1>Lo que espera su precio</h1>
+    <p class="entradilla">Cada empresa lleva la etiqueta de la cartera en la que entraría.</p>${rejilla}
+    ${datos.watchlist_tambien ? `<p class="tambien"><span class="rotulo" style="font-size:10px">También en seguimiento · </span>${esc(datos.watchlist_tambien)}</p>` : ''}`;
+}
+
+function empresa(id) {
+  const r = todas().find(o => o.x.id === id);
+  if (!r) return '<h1>No encuentro esa empresa</h1>';
+  const x = r.x;
+  const trimestres = x.trimestres.length ? x.trimestres.map(t => `<div class="trimestre"><div class="periodo">${esc(t.periodo)}</div>
+      <div class="botones">${t.docs.map(d => boton(d.f, d.tipo + (d.fecha ? ' · ' + d.fecha : ''), 'boton--suave')).join('')}</div></div>`).join('')
+    : '<p class="vacio">La primera ficha previa saldrá unos días antes de los próximos resultados.</p>';
+  const complementos = (x.complementos || []).map(d => `<div class="trimestre"><div class="periodo">${esc(d.fecha)}</div>
+      <div class="botones"><div>${boton(d.f, d.titulo + ' (PDF)', 'boton--suave')}
+        ${d.descripcion ? `<p class="nota-gris" style="margin:8px 0 0">${esc(d.descripcion)}</p>` : ''}</div></div></div>`).join('');
+  const anteriores = x.tesis.slice(1);
+  return `<a class="volver" href="${r.ruta}">← Volver a ${esc(r.origen)}</a>
+    <div class="ficha">
+      ${x.foto ? `<div class="foto">${foto(x)}<p class="mano" style="margin:10px 0 0;font-size:18px">${esc(x.pie_foto)}</p><p class="credito">${esc(x.credito)}</p></div>` : ''}
+      <div class="texto"><span class="etiqueta">${esc(x.etiqueta)}</span>
+        <h1 style="margin-top:10px">${esc(x.nombre)} <span class="ticker" style="font-size:14px">${esc(x.ticker)}</span></h1>
+        <p class="entradilla" style="margin-top:6px">${esc(x.descripcion)}</p>
+        ${x.titular ? `<p class="titular-tesis" style="font-size:21px;margin-top:12px">«${esc(x.titular)}»${x.subtitular ? ' ' + esc(x.subtitular) : ''}</p>` : ''}
+        <div class="botones" style="margin-top:18px">${boton(x.tesis[0].f, 'Tesis vigente · ' + x.tesis[0].fecha + ' (PDF)')}
+          ${x.repaso ? `<a class="boton boton--suave" href="#/repaso/${encodeURIComponent(x.id)}">Repaso de la tesis</a>` : ''}
+          ${industriasDe(x).map(i => `<a class="boton boton--suave" href="#/industrias/${encodeURIComponent(i.id)}" title="${esc(i.nombre)}">Informe de su sector</a>`).join('')}</div></div>
+    </div>
+    ${x.discrepo ? `<div class="discrepo"><div class="mano">Dónde discrepo</div><div class="prosa">${x.discrepo}</div></div>` : ''}
+    ${datos.privado ? panelOpiniones(x.bib, false) : ''}
+    ${complementos ? `<h2>Lecturas complementarias</h2>${complementos}` : ''}
+    <h2>Trimestre a trimestre</h2>
+    <p class="nota-gris" style="margin:0 0 4px">El más reciente arriba. La ficha previa fija antes del dato qué confirma la tesis y qué la pone en alerta; el seguimiento lo contrasta.</p>
+    ${trimestres}
+    ${anteriores.length ? `<h2>Tesis anteriores</h2><div class="botones">${anteriores.map(t => boton(t.f, 'Tesis · ' + t.fecha, 'boton--suave')).join('')}</div>` : ''}`;
+}
+
+// ---------- industrias (Jose, 15/11/2026; versión visual del 16/11/2026) ----------
+// Un informe de sector toca a varias empresas: tiene pestaña propia y cada ficha
+// de su lista enlaza a él. En la salida pública el generador ya ha dejado solo
+// las industrias de publico.txt y, en cada una, solo las empresas y conexiones públicas.
+// Jose (16/11/2026): «mucho más visual», «un mapa de conexiones que entras y sale el
+// informe», imágenes, y los estudios de terceros como algo complementario, no principal.
+// Escala sola: cada carpeta nueva de 06_INDUSTRIAS entra en el mapa por su familia.
+function industriasDe(x) {
+  return (datos.industrias || []).filter(i => i.empresas.includes(String(x.ticker).toUpperCase()));
+}
+// Desde el 16/11/2026 las familias son los 11 sectores GICS (Jose: «sí, cámbialo a los sectores oficiales»).
+const IND_COLOR = { 'Tecnologías de la información': '#2E5F73', 'Servicios de comunicación': '#3D6E8F', 'Consumo discrecional': '#A8486A',
+  'Consumo básico': '#8E6A2F', 'Salud': '#3F7A5A', 'Financiero': '#5B4E8C', 'Industria': '#55606E', 'Energía': '#A0422F',
+  'Materiales': '#9A5B2E', 'Servicios públicos (utilities)': '#64752C', 'Inmobiliario': '#7A5C3E' };
+const IND_RESERVA = ['#6B4E7A', '#3E6E73', '#7A6A2E', '#4E5A7A', '#7A3E52'];
+function familias() {
+  const vistas = [];
+  (datos.industrias || []).forEach(i => { if (!vistas.includes(i.familia)) vistas.push(i.familia); });
+  return vistas.sort((a, b) => a.localeCompare(b, 'es'));
+}
+function colorFamilia(f) {
+  if (IND_COLOR[f]) return IND_COLOR[f];
+  const otras = familias().filter(x => !IND_COLOR[x]);
+  return IND_RESERVA[Math.max(0, otras.indexOf(f)) % IND_RESERVA.length];
+}
+// Pictogramas de línea (24×24), uno por familia; el resto, un nodo genérico.
+const IND_ICONO = {
+  'Tecnologías de la información': '<rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+  'Servicios de comunicación': '<path d="M4 4h16v11H10l-5 4v-4H4V4z"/><path d="M8 9h8M8 12h5"/>',
+  'Consumo discrecional': '<path d="M5 8h14l-1 13H6L5 8z"/><path d="M9 8a3 3 0 0 1 6 0"/>',
+  'Consumo básico': '<path d="M3 9h18l-2 11H5L3 9z"/><path d="M8 9l4-6 4 6M9 13v4M15 13v4M12 13v4"/>',
+  'Materiales': '<path d="M3 19l3-7h12l3 7H3z"/><path d="M7.5 12l2-5h5l2 5"/>',
+  'Salud': '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3z"/>',
+  'Industria': '<circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
+  'Energía': '<path d="M13 2L5 14h6l-1 8 8-12h-6l1-8z"/>',
+  'Financiero': '<path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',
+  'Servicios públicos (utilities)': '<path d="M9 2v5M15 2v5M6 7h12v4a6 6 0 0 1-12 0V7zM12 17v5"/>',
+  'Inmobiliario': '<path d="M3 11l9-7 9 7M5 10v10h14V10M10 20v-6h4v6"/>',
+};
+// Qué industrias GICS cubre la ficha y qué otros sectores toca (solo en la privada,
+// que lleva el mapa del mercado). Arregla lo que el sector solo no dice: Movilidad
+// es «Industria · Transporte terrestre» y Materias primas cíclicas «también Energía».
+function cubreTxt(i) {
+  const g = i.gics || [];
+  // Si la industria GICS se llama como la ficha (Software, Semiconductores…), no aporta nada.
+  if (g.length === 1) return g[0].nombre.toLowerCase().startsWith(i.nombre.toLowerCase()) ? '' : g[0].nombre;
+  return g.length ? `${g.length} industrias` : '';
+}
+function tambienTxt(i) { return (i.tambien || []).length ? 'también ' + i.tambien.join(' y ') : ''; }
+const IND_ICONO_OTRO = '<circle cx="12" cy="12" r="3"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="20" r="2"/><path d="M7 7l3 3M17 7l-3 3M12 15v3"/>';
+const icono = (f, color, extra) => `<svg viewBox="0 0 24 24" fill="none" stroke="${color || 'currentColor'}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" ${extra || ''}>${IND_ICONO[f] || IND_ICONO_OTRO}</svg>`;
+// Fondo ilustrado para lo que no trae imagen (informes en PDF) y para la cabecera.
+function patron(f, color, id) {
+  return `<svg class="patron" viewBox="0 0 240 135" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs><pattern id="p-${id}" width="48" height="48" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)">
+      <g transform="translate(12 12)">${icono(f, '#fff').replace('<svg', '<svg width="24" height="24"')}</g></pattern></defs>
+    <rect width="240" height="135" fill="url(#p-${id})"/></svg>`;
+}
+function ilustracion(i) {
+  const c = colorFamilia(i.familia);
+  return `<svg class="ilustra" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="320" height="180" fill="${c}"/>
+    <defs><pattern id="ip-${esc(i.id)}" width="46" height="46" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)">
+      <g transform="translate(11 11)" opacity=".18">${icono(i.familia, '#fff').replace('<svg', '<svg width="24" height="24"')}</g></pattern></defs>
+    <rect width="320" height="180" fill="url(#ip-${esc(i.id)})"/>
+    <g transform="translate(130 60)">${icono(i.familia, '#fff').replace('<svg', '<svg width="60" height="60"')}</g></svg>`;
+}
+function chipIndustria(id, conTexto) {
+  const o = (datos.industrias || []).find(x => x.id === id);
+  if (!o) return '';
+  const c = colorFamilia(o.familia);
+  return `<a class="ind-chip" href="#/industrias/${encodeURIComponent(o.id)}" style="color:${c};border-color:${c}55;background:${c}0F">${esc(conTexto || o.nombre)}</a>`;
+}
+// Aristas sin repetir: las declaradas (con su motivo) y, en gris, las de empresas compartidas.
+function aristas() {
+  const lista = datos.industrias || [], mapa = new Map();
+  lista.forEach(i => i.conexiones.forEach(c => {
+    const k = [i.id, c.a].sort().join('|');
+    const v = mapa.get(k) || { a: i.id, b: c.a, por: [], comun: [] };
+    v.por.push({ de: i.id, texto: c.por }); mapa.set(k, v);
+  }));
+  const nombres = new Map(todas().map(o => [String(o.x.ticker).toUpperCase(), o.x.nombre]));
+  for (let x = 0; x < lista.length; x++) for (let y = x + 1; y < lista.length; y++) {
+    const comun = lista[x].empresas.filter(t => lista[y].empresas.includes(t) && nombres.has(t));
+    if (!comun.length) continue;
+    const k = [lista[x].id, lista[y].id].sort().join('|');
+    const v = mapa.get(k) || { a: lista[x].id, b: lista[y].id, por: [], comun: [] };
+    v.comun = comun.map(t => nombres.get(t)); mapa.set(k, v);
+  }
+  return [...mapa.values()];
+}
+const vecinos = id => aristas().filter(e => e.a === id || e.b === id);
+const motivo = e => [...e.por.map(p => p.texto), ...(e.comun.length ? ['Comparten empresa: ' + e.comun.join(', ') + '.'] : [])].join(' ');
+
+// Posiciones: familias en una elipse, industrias alrededor del centro de su familia,
+// y unas vueltas de repulsión para que no se pisen. Determinista: mismo mapa cada vez.
+function colocar(ancho, alto) {
+  const lista = datos.industrias || [], fams = familias(), pos = {}, centro = {};
+  const rx = ancho * 0.36, ry = alto * 0.33;
+  fams.forEach((f, k) => {
+    const ang = fams.length === 1 ? 0 : -Math.PI / 2 + 2 * Math.PI * k / fams.length;
+    centro[f] = fams.length === 1 ? [ancho / 2, alto / 2] : [ancho / 2 + rx * Math.cos(ang), alto / 2 + ry * Math.sin(ang)];
+    const suyas = lista.filter(i => i.familia === f);
+    suyas.forEach((i, n) => {
+      const a = 2 * Math.PI * n / suyas.length + k, r = suyas.length === 1 ? 0 : 52 + 9 * suyas.length;
+      pos[i.id] = [centro[f][0] + r * Math.cos(a), centro[f][1] + r * Math.sin(a)];
+    });
+  });
+  const ar = aristas(), m = 70, minimo = 150;
+  for (let it = 0; it < 260; it++) {
+    const ids = Object.keys(pos);
+    for (let x = 0; x < ids.length; x++) for (let y = x + 1; y < ids.length; y++) {
+      const p = pos[ids[x]], q = pos[ids[y]], dx = q[0] - p[0], dy = q[1] - p[1], d = Math.hypot(dx, dy) || 0.01;
+      if (d < minimo) { const e = (minimo - d) / d * 0.5; p[0] -= dx * e; p[1] -= dy * e; q[0] += dx * e; q[1] += dy * e; }
+    }
+    ar.forEach(e => {
+      const p = pos[e.a], q = pos[e.b]; if (!p || !q) return;
+      const dx = q[0] - p[0], dy = q[1] - p[1], d = Math.hypot(dx, dy) || 0.01, t = (d - 260) / d * 0.004;
+      p[0] += dx * t; p[1] += dy * t; q[0] -= dx * t; q[1] -= dy * t;
+    });
+    lista.forEach(i => { const p = pos[i.id], c = centro[i.familia];
+      p[0] += (c[0] - p[0]) * 0.05; p[1] += (c[1] - p[1]) * 0.05;
+      p[0] = Math.min(ancho - m, Math.max(m, p[0])); p[1] = Math.min(alto - m, Math.max(m - 10, p[1])); });
+  }
+  return { pos, centro };
+}
+function mapaSvg() {
+  const lista = datos.industrias || [];
+  const caja = document.getElementById('ind-mapa');
+  const estrecho = caja && caja.clientWidth < 620;
+  const ancho = estrecho ? 560 : 1000, alto = estrecho ? Math.max(760, 150 * Math.ceil(lista.length / 2) + 160) : Math.max(560, 60 * lista.length + 200);
+  const { pos, centro } = colocar(ancho, alto);
+  const ar = aristas();
+  const halos = familias().map(f => {
+    const suyas = lista.filter(i => i.familia === f).map(i => pos[i.id]);
+    const cx = suyas.reduce((s, p) => s + p[0], 0) / suyas.length, cy = suyas.reduce((s, p) => s + p[1], 0) / suyas.length;
+    const r = Math.max(...suyas.map(p => Math.hypot(p[0] - cx, p[1] - cy))) + 78;
+    const c = colorFamilia(f);
+    return `<circle class="halo" cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>
+      <text class="familia-txt" x="${Math.min(ancho - f.length * 6.6 - 10, Math.max(f.length * 6.6 + 10, cx))}" y="${Math.max(18, cy - r + 20)}" text-anchor="middle" fill="${c}">${esc(f)}</text>`;
+  }).join('');
+  const lineas = ar.map((e, k) => {
+    const p = pos[e.a], q = pos[e.b]; if (!p || !q) return '';
+    const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2, dx = q[0] - p[0], dy = q[1] - p[1], d = Math.hypot(dx, dy) || 1;
+    const cx = mx - dy * 0.22, cy = my + dx * 0.22, ruta = `M${p[0]},${p[1]} Q${cx},${cy} ${q[0]},${q[1]}`;
+    const o = lista.find(i => i.id === e.a);
+    const clase = e.por.length ? 'arista' : 'arista arista--comun';
+    return `<path class="${clase}" data-a="${esc(e.a)}" data-b="${esc(e.b)}" d="${ruta}" ${e.por.length ? `stroke="${colorFamilia(o.familia)}"` : ''}/>
+      <path class="arista-hit" data-k="${k}" d="${ruta}"><title>${esc(motivo(e))}</title></path>`;
+  }).join('');
+  const nodos = lista.map(i => {
+    const [x, y] = pos[i.id], c = colorFamilia(i.familia), n = vecinos(i.id).length;
+    return `<a class="nodo" href="#/industrias/${encodeURIComponent(i.id)}" data-id="${esc(i.id)}" tabindex="0">
+      <circle class="fondo" cx="${x}" cy="${y}" r="36" stroke="${c}"/>
+      <g transform="translate(${x - 17} ${y - 17})">${icono(i.familia, c, 'width="34" height="34"')}</g>
+      <text x="${x}" y="${y + 58}">${esc(i.nombre)}</text>
+      <text class="sub" x="${x}" y="${y + 74}">${esc(tambienTxt(i) || cubreTxt(i) || ((i.ficha ? 'Ficha' : 'Informe') + ' · ' + n + ' ' + (n === 1 ? 'conexión' : 'conexiones')))}</text></a>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${ancho} ${alto}" role="img" aria-label="Mapa de industrias y sus conexiones">${halos}${lineas}${nodos}</svg>`;
+}
+function activarMapa() {
+  const caja = document.getElementById('ind-mapa');
+  if (!caja) return;
+  const lienzo = caja.querySelector('.lienzo'), pista = caja.querySelector('.ind-pista');
+  const base = pista.innerHTML;
+  lienzo.innerHTML = mapaSvg();
+  const ar = aristas(), lista = datos.industrias || [];
+  const enfocar = id => {
+    if (!id) { caja.classList.remove('foco'); pista.innerHTML = base; return; }
+    const v = vecinos(id), on = new Set([id, ...v.map(e => e.a === id ? e.b : e.a)]);
+    caja.classList.add('foco');
+    caja.querySelectorAll('.nodo').forEach(n => n.classList.toggle('on', on.has(n.dataset.id)));
+    caja.querySelectorAll('.arista').forEach(a => a.classList.toggle('on', a.dataset.a === id || a.dataset.b === id));
+    const i = lista.find(x => x.id === id);
+    pista.innerHTML = `<b>${esc(i.nombre)}</b>${i.titular ? ' · ' + esc(i.titular) : ''}<br>` + (v.length
+      ? v.map(e => `→ <b>${esc(lista.find(x => x.id === (e.a === id ? e.b : e.a)).nombre)}</b>: ${esc(motivo(e))}`).join('<br>')
+      : 'Todavía sin conexiones con otras fichas.');
+  };
+  caja.querySelectorAll('.nodo').forEach(n => {
+    n.addEventListener('mouseenter', () => enfocar(n.dataset.id));
+    n.addEventListener('focus', () => enfocar(n.dataset.id));
+  });
+  caja.querySelectorAll('.arista-hit').forEach(h => h.addEventListener('mouseenter', () => {
+    const e = ar[h.dataset.k];
+    pista.innerHTML = `<b>${esc(lista.find(x => x.id === e.a).nombre)} ↔ ${esc(lista.find(x => x.id === e.b).nombre)}</b>: ${esc(motivo(e))}`;
+  }));
+  lienzo.addEventListener('mouseleave', () => enfocar(null));
+  if (!window._mapaRedim) {
+    window._mapaRedim = true;
+    let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => {
+      const c = document.getElementById('ind-mapa'); if (c) activarMapa(); }, 200); });
+  }
+}
+function tarjetaIndustria(i) {
+  const c = colorFamilia(i.familia), g = i.graficos[0];
+  const imagen = g ? `<img data-img="${esc(g.f)}" data-tipo="${esc(g.tipo)}" alt="${esc(g.titulo)}">` : ilustracion(i);
+  const cifras = i.cifras.slice(0, 2);
+  const conex = vecinos(i.id).map(e => e.a === i.id ? e.b : e.a);
+  return `<a class="ind-tarjeta" href="#/industrias/${encodeURIComponent(i.id)}" data-familia="${esc(i.familia)}">
+    <div class="imagen">${imagen}<span class="sello" style="background:${c}">${icono(i.familia, '#fff')}${esc(i.familia)}</span></div>
+    <div class="cuerpo">
+      <h3>${esc(i.nombre)}</h3>
+      ${(i.gics || []).length ? `<p class="ind-gics">${i.gics.length === 1 ? 'Industria' : 'Industrias'}: ${esc(i.gics.map(g => g.nombre).join(', '))}${(i.tambien || []).length ? ` · <b>${esc(tambienTxt(i))}</b>` : ''}</p>` : ''}
+      <p class="tit">${esc(i.titular ? i.titular.replace(/^[^:]{0,40}:\s*/, '') : i.descripcion.slice(0, 150) + (i.descripcion.length > 150 ? '…' : ''))}</p>
+      ${cifras.length ? `<div class="ind-cifras">${cifras.map(x => `<div><b>${esc(x.v).replace(/ (%|\/)/g, '\u00a0$1')}</b><span>${esc(x.l)}</span></div>`).join('')}</div>` : ''}
+      <div class="pie">${conex.length ? 'Conecta con ' + conex.map(id => esc((datos.industrias.find(x => x.id === id) || {}).nombre)).join(' · ') + ' · ' : ''}${i.ficha ? 'Ficha' : 'Informe'} del ${esc(i.ficha ? i.ficha.fecha : i.informes[0].fecha)}</div>
+    </div></a>`;
+}
+function filaTercero(t) {
+  const rel = (t.industrias || []).filter(id => (datos.industrias || []).some(x => x.id === id));
+  return `<div class="ind-tercero"><div class="t">${esc(t.titulo)}</div>${boton(t.f, 'PDF', 'boton--suave boton--peq')}
+    <div class="m">${esc(t.autor)} · datos a ${esc(t.fecha_datos)}${rel.length ? ' · ' + rel.map(id => chipIndustria(id)).join(' ') : ''}</div></div>`;
+}
+// Estudios de terceros: solo existen en la salida privada (el generador nunca los
+// mete en la pública y comprobar_publico falla si aparecen). Desde el 16/11/2026
+// van plegados: son complemento, no la pestaña.
+function bloqueTerceros(lista, titulo) {
+  if (!SALIDA_PRIVADA || !lista.length) return '';
+  const autores = [...new Set(lista.map(t => t.autor))].join(', ');
+  return `<details class="ind-terceros"><summary><span>${esc(titulo)} · ${lista.length} ${lista.length === 1 ? 'estudio' : 'estudios'} de terceros
+    <small>${esc(autores)}. No los verifica Walker: sirven de mapa y para llegar a sus fuentes.</small></span></summary>
+    <div class="filas">${lista.map(filaTercero).join('')}</div></details>`;
+}
+function industria(i) {
+  const c = colorFamilia(i.familia);
+  const fichas = new Map(todas().map(o => [String(o.x.ticker).toUpperCase(), o.x]));
+  const empresas = i.empresas.filter(t => fichas.has(t));
+  const v = vecinos(i.id);
+  const docs = (i.ficha ? `<button type="button" class="boton" data-ficha-ir>Leer la ficha</button>` +
+      `<button type="button" class="boton boton--suave" data-pdf="${esc(i.ficha.f)}" data-tipo="text/html">Abrir en pestaña nueva</button>` : '')
+    + i.informes.map((a, n) => boton(a.f, (n ? 'Anterior · ' : (i.ficha ? 'PDF · ' : 'Informe (PDF) · ')) + a.fecha, n || i.ficha ? 'boton--suave' : '')).join('');
+  // Mini mapa: la industria en el centro y sus vecinas alrededor.
+  const mini = v.length ? (() => {
+    const W = 340, H = 260, cx = W / 2, cy = H / 2;
+    const otros = v.map((e, k) => { const id = e.a === i.id ? e.b : e.a, a = -Math.PI / 2 + 2 * Math.PI * k / v.length;
+      return { id, e, x: cx + 112 * Math.cos(a), y: cy + 88 * Math.sin(a), o: datos.industrias.find(x => x.id === id) }; });
+    return `<svg viewBox="0 0 ${W} ${H}">${otros.map(n => `<line x1="${cx}" y1="${cy}" x2="${n.x}" y2="${n.y}" stroke="${n.e.por.length ? c : '#9C927F'}" stroke-width="2.4" ${n.e.por.length ? '' : 'stroke-dasharray="5 5"'} opacity=".6"/>`).join('')}
+      ${otros.map(n => `<a href="#/industrias/${encodeURIComponent(n.id)}"><circle cx="${n.x}" cy="${n.y}" r="22" fill="#fff" stroke="${colorFamilia(n.o.familia)}" stroke-width="3"/>
+        <g transform="translate(${n.x - 11} ${n.y - 11})">${icono(n.o.familia, colorFamilia(n.o.familia), 'width="22" height="22"')}</g>
+        <text x="${n.x}" y="${n.y + 38}">${esc(n.o.nombre)}</text></a>`).join('')}
+      <circle cx="${cx}" cy="${cy}" r="30" fill="${c}"/><g transform="translate(${cx - 15} ${cy - 15})">${icono(i.familia, '#fff', 'width="30" height="30"')}</g></svg>`;
+  })() : '';
+  const relTerceros = (datos.terceros || []).filter(t => (t.industrias || []).includes(i.id));
+  return `<a class="volver" href="#/industrias">← Industrias</a>
+    <div class="ind-heroe" style="background:${c}">${patron(i.familia, c, i.id)}
+      <div class="rotulo">${icono(i.familia, '#fff')}${esc(i.familia)}${cubreTxt(i) && (i.gics || []).length === 1 ? ' · ' + esc(cubreTxt(i)) : ''} · ${i.ficha ? 'ficha del ' + esc(i.ficha.fecha) : 'informe del ' + esc(i.informes[0].fecha)}</div>
+      <h1>${esc(i.titular || i.nombre)}</h1>
+      <p class="entradilla">${esc(i.entradilla || i.descripcion)}</p>
+      ${(i.gics || []).length ? `<p class="ind-cubre">Cubre ${i.gics.length === 1 ? 'la industria' : 'las industrias'} ${esc(i.gics.map(g => g.nombre + (g.sector !== i.familia ? ' (' + g.sector + ')' : '')).join(', '))}${(i.tambien || []).length ? '; por eso toca también ' + esc(i.tambien.join(' y ')) : ''}.</p>` : ''}
+      <div class="botones">${docs}</div>
+    </div>
+    ${i.cifras.length ? `<div class="ind-tiles">${i.cifras.map(x => `<div style="border-top-color:${c}"><b style="color:${c}">${esc(x.v)}</b><span>${esc(x.l)}</span>${x.c ? `<small>${esc(x.c)}</small>` : ''}</div>`).join('')}</div>` : ''}
+    ${i.donde ? `<div class="ind-donde" style="border-color:${c}">${esc(i.donde)}</div>` : ''}
+    ${i.graficos.length ? `<h2>En gráficos</h2><div class="ind-galeria">${i.graficos.map(g => `<figure data-ampliar><img data-img="${esc(g.f)}" data-tipo="${esc(g.tipo)}" alt="${esc(g.titulo)}"><figcaption>${esc(g.titulo)}</figcaption></figure>`).join('')}</div>` : ''}
+    <h2>Con qué se conecta</h2>
+    ${v.length ? `<div class="ind-conex"><div class="mini">${mini}</div><ul>${v.map(e => `<li>${chipIndustria(e.a === i.id ? e.b : e.a)}<span>${esc(motivo(e))}</span></li>`).join('')}</ul></div>`
+      : '<p class="nota-gris">Todavía sin conexiones con otras fichas del mapa.</p>'}
+    ${empresas.length ? `<div class="ind-filtros" style="margin-top:18px"><span class="rotulo" style="align-self:center;margin-right:4px">Empresas del terminal</span>${empresas.map(t => `<a class="ind-chip" style="color:var(--pizarra);border-color:var(--pizarra-borde);background:#fff;min-height:32px" href="#/empresa/${encodeURIComponent(fichas.get(t).id)}">${esc(fichas.get(t).nombre)}</a>`).join('')}</div>` : ''}
+    ${bloqueTerceros(relTerceros, 'Para leer más')}
+    ${i.ficha ? `<h2 id="ficha-completa">La ficha completa</h2><p class="nota-gris" id="estado-ficha">Abriendo la ficha…</p>
+      <iframe class="marco-ficha" title="Ficha de ${esc(i.nombre)}" data-ficha="${esc(i.ficha.f)}" hidden></iframe>` : ''}`;
+}
+function industrias(id) {
+  const lista = datos.industrias || [];
+  const una = id && lista.find(i => i.id === id);
+  if (una) return industria(una);
+  // Mapa del mercado (16/11/2026): portada de la pestaña cuando la salida lo trae (solo la privada).
+  if (datos.mapa_mercado && !id) return mapaMercado();
+  const fams = familias(), ar = aristas();
+  const cabecera = `<div class="rotulo">Industrias · mapa de sectores</div><h1>Cómo funciona cada sector y cómo se tocan</h1>
+    <p class="entradilla">Cada nodo es una ficha de sector; cada línea, una forma en que un sector mueve a otro. Pasa por encima para ver por qué, y entra para ver sus cifras, sus gráficos y la ficha completa.</p>
+    ${vistasIndustrias('conexiones')}`;
+  if (!lista.length) return cabecera + '<p class="vacio">Todavía no hay ningún informe de sector publicado.</p>' + bloqueTerceros(datos.terceros || [], 'Lecturas de fuera');
+  return cabecera + `
+    <div class="ind-resumen"><span><b>${lista.length}</b>${lista.length === 1 ? 'ficha' : 'fichas'}</span><span><b>${fams.length}</b>${fams.length === 1 ? 'sector' : 'sectores'}</span><span><b>${ar.length}</b>${ar.length === 1 ? 'conexión' : 'conexiones'}</span></div>
+    <div class="ind-mapa" id="ind-mapa"><div class="lienzo"></div><div class="ind-pista">Pasa por encima de un sector o de una línea para ver cómo se afectan. Toca un sector para entrar.</div></div>
+    <div class="ind-leyenda"><span><i></i>Relación explicada en la ficha</span><span><i class="comun"></i>Comparten empresa del terminal</span></div>
+    <h2>Las fichas</h2>
+    ${fams.length > 1 ? `<div class="ind-filtros" role="group" aria-label="Filtrar por sector"><button type="button" aria-pressed="true" data-fam="">Todas</button>${fams.map(f => `<button type="button" aria-pressed="false" data-fam="${esc(f)}"><i style="background:${colorFamilia(f)}"></i>${esc(f)}</button>`).join('')}</div>` : ''}
+    <div class="ind-rejilla">${lista.map(tarjetaIndustria).join('')}</div>
+    ${bloqueTerceros(datos.terceros || [], 'Lecturas de fuera')}`;
+}
+// ---------- Mapa del mercado (Jose, 16/11/2026: «hazme un boceto», «vale, súbelo») ----------
+// Portada de Industrias en la salida privada: las 74 industrias GICS en recuadros
+// del tamaño de su peso en el S&P 500 y del color del estado de su ficha (no del
+// sector). El punto marca dónde hay empresas de cartera o watchlist. Los datos los
+// deja el generador en datos.mapa_mercado (06_INDUSTRIAS/mapa.json); la pública no
+// los lleva y abre directamente «Conexiones».
+const MM_ESTADO = {
+  'hecha': { t: 'Ficha hecha', c: '#5E8C5A', txt: '#fff' },
+  'en marcha': { t: 'Ficha en marcha', c: '#D4A142', txt: '#1B1712' },
+  'propuesta': { t: 'Ficha propuesta', c: '#8A6BB5', txt: '#fff' },
+  '': { t: 'Sin ficha', c: '#DCD5C8', txt: '#1B1712' },
+};
+const MM_MINIMO = 0.15;   // peso con el que se dibujan las industrias sin peso (o casi) en el índice
+let mmElegida = null;     // la industria abierta en el panel, para volver a ella desde una ficha
+const pctEs = (v, d = 1) => Number(v).toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d }) + ' %';
+// Treemap «squarified» (Bruls, Huizing y Van Wijk): recuadros lo más cuadrados posible.
+function mmCuadrar(items, x, y, w, h) {
+  const out = [], total = items.reduce((s, i) => s + i.v, 0);
+  if (!total || w <= 0 || h <= 0) return out;
+  let resto = items.map(i => ({ i, a: i.v * w * h / total }));
+  const peor = (f, lado) => {
+    const s = f.reduce((t, r) => t + r.a, 0), mx = Math.max(...f.map(r => r.a)), mn = Math.min(...f.map(r => r.a));
+    return Math.max(lado * lado * mx / (s * s), s * s / (lado * lado * mn));
+  };
+  while (resto.length) {
+    const lado = Math.min(w, h), fila = [resto[0]];
+    let k = 1;
+    while (k < resto.length && peor([...fila, resto[k]], lado) <= peor(fila, lado)) fila.push(resto[k++]);
+    const s = fila.reduce((t, r) => t + r.a, 0);
+    if (w >= h) {
+      const fw = s / h; let yy = y;
+      fila.forEach(r => { const fh = r.a / fw; out.push({ ...r.i, x, y: yy, w: fw, h: fh }); yy += fh; });
+      x += fw; w -= fw;
+    } else {
+      const fh = s / w; let xx = x;
+      fila.forEach(r => { const fw = r.a / fh; out.push({ ...r.i, x: xx, y, w: fw, h: fh }); xx += fw; });
+      y += fh; h -= fh;
+    }
+    resto = resto.slice(k);
+  }
+  return out;
+}
+function mmFichas() { return new Map(todas().map(o => [String(o.x.ticker).toUpperCase(), o])); }
+function mapaMercado() {
+  const mm = datos.mapa_mercado, lista = mm.industrias;
+  const cuenta = e => lista.filter(i => i.estado === e).length;
+  const conEmpresas = lista.filter(i => i.empresas.length).length;
+  return `<div class="rotulo">Industrias · mapa del mercado</div><h1>Todo el mercado, industria a industria</h1>
+    <p class="entradilla">Cada recuadro es una de las ${lista.length} industrias en que se divide la bolsa según la clasificación GICS de MSCI. El tamaño es lo que pesa en el S&P 500; el color, si ya hay ficha de esa industria. Pulsa una para ver qué incluye, sus mayores empresas y las tuyas.</p>
+    ${vistasIndustrias('mapa')}
+    <div class="mm-leyenda" aria-label="Leyenda">${Object.entries(MM_ESTADO).map(([e, o]) => `<span><i style="background:${o.c}"></i>${esc(o.t)} <b>${cuenta(e)}</b></span>`).join('')}
+      <span class="punto"><i></i>Tienes empresas en ella (cartera o watchlist) <b>${conEmpresas}</b></span></div>
+    <div class="mm-cuerpo" id="mm">
+      <div><div class="mm-lienzo" role="group" aria-label="Industrias por peso en el S&P 500"></div>
+        <p class="mm-pie">Estructura: clasificación GICS de MSCI (versión de 2023). Peso: S&P 500 a ${esc(mm.fecha)} (fuente: ${esc(mm.fuente_peso.replace(/^S&P 500\s*/, '').replace(/[()]/g, '').replace(' + ', ' y '))}). Las industrias sin empresas en el índice, o casi, se dibujan con un tamaño mínimo para que se vean: su recuadro no está a escala.</p></div>
+      <aside class="mm-panel" aria-live="polite"></aside>
+    </div>`;
+}
+function vistasIndustrias(activa) {
+  if (!datos.mapa_mercado) return '';
+  return `<nav class="mm-vistas" aria-label="Vistas de Industrias">
+    <a href="#/industrias"${activa === 'mapa' ? ' aria-current="page"' : ''}>Mapa del mercado</a>
+    <a href="#/industrias/conexiones"${activa === 'conexiones' ? ' aria-current="page"' : ''}>Conexiones</a></nav>`;
+}
+function mmDibujar() {
+  const caja = document.getElementById('mm');
+  if (!caja) return;
+  const lienzo = caja.querySelector('.mm-lienzo'), mm = datos.mapa_mercado;
+  const W = lienzo.clientWidth, H = Math.round(W >= 640 ? W * 0.62 : W * 1.45);
+  lienzo.style.height = H + 'px';
+  const sectores = mm.sectores.map(s => {
+    const inds = mm.industrias.map((i, n) => ({ ...i, n, v: Math.max(i.peso, MM_MINIMO) })).filter(i => i.sector === s.nombre)
+      .sort((a, b) => b.v - a.v);
+    return { s, inds, v: inds.reduce((t, i) => t + i.v, 0) };
+  }).filter(x => x.inds.length).sort((a, b) => b.v - a.v);
+  let html = '';
+  mmCuadrar(sectores, 0, 0, W, H).forEach(sec => {
+    const cab = sec.w > 70 && sec.h > 60 ? 18 : 0, g = 2;
+    html += `<div class="mm-sector" style="left:${sec.x}px;top:${sec.y}px;width:${sec.w}px;height:${sec.h}px">${cab ? `<div class="t" title="${esc(sec.s.nombre)}">${esc(sec.s.nombre)} · ${pctEs(sec.s.peso)}</div>` : ''}</div>`;
+    mmCuadrar(sec.inds, sec.x + g, sec.y + cab + g, sec.w - 2 * g, sec.h - cab - 2 * g).forEach(r => {
+      const e = MM_ESTADO[r.estado] || MM_ESTADO[''], w = r.w - 2, h = r.h - 2;
+      const lineas = Math.max(1, Math.min(4, Math.floor((h - (w > 52 && h > 44 ? 24 : 10)) / (w > 150 && h > 80 ? 17 : 14))));
+      const nombre = w > 52 && h > 26, peso = w > 52 && h > 44;
+      html += `<button type="button" class="mm-caja${w > 150 && h > 80 ? ' grande' : ''}${r.empresas.length ? ' con-punto' : ''}${mmElegida === r.n ? ' on' : ''}" data-n="${r.n}"
+        style="left:${r.x + 1}px;top:${r.y + 1}px;width:${w}px;height:${h}px;background:${e.c};color:${e.txt}"
+        title="${esc(r.nombre)} · ${pctEs(r.peso, 2)} del S&P 500 · ${esc(e.t.toLowerCase())}${r.empresas.length ? ' · tus empresas: ' + esc(r.empresas.join(', ')) : ''}"
+        aria-label="${esc(r.nombre)}, ${pctEs(r.peso, 2)} del S&P 500, ${esc(e.t.toLowerCase())}${r.empresas.length ? ', con empresas tuyas' : ''}">
+        ${nombre ? `<span class="n" lang="es" style="-webkit-line-clamp:${lineas}">${esc(r.nombre)}</span>` : ''}${peso ? `<span class="p">${pctEs(r.peso)}</span>` : ''}${r.empresas.length ? '<i class="pt"></i>' : ''}</button>`;
+    });
+  });
+  lienzo.innerHTML = html;
+  lienzo.querySelectorAll('.mm-caja').forEach(b => b.addEventListener('click', () => {
+    mmElegida = Number(b.dataset.n);
+    lienzo.querySelectorAll('.mm-caja').forEach(x => x.classList.toggle('on', x === b));
+    mmPanel();
+    if (window.innerWidth <= 900) caja.querySelector('.mm-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }));
+}
+function mmPanel() {
+  const panel = document.querySelector('#mm .mm-panel'), mm = datos.mapa_mercado;
+  if (!panel) return;
+  const i = mm.industrias[mmElegida];
+  if (!i) {
+    const cuenta = e => mm.industrias.filter(x => x.estado === e).length;
+    panel.innerHTML = `<div class="rotulo">Cómo se lee</div><h3>Pulsa un recuadro</h3>
+      <p>Verás de qué va la industria, cuánto pesa, sus mayores empresas, las tuyas y sus subindustrias, con el botón a la ficha si ya está hecha.</p>
+      <div class="cuenta">${Object.entries(MM_ESTADO).map(([e, o]) => `<i style="background:${o.c}"></i><span><b>${cuenta(e)}</b> · ${esc(o.t.toLowerCase())}</span>`).join('')}</div>
+      <p class="nota-gris" style="margin-top:14px">Las fichas hechas cubren el ${pctEs(mm.industrias.filter(x => x.estado === 'hecha').reduce((t, x) => t + x.peso, 0), 0)} del peso del S&P 500.</p>`;
+    return;
+  }
+  const e = MM_ESTADO[i.estado] || MM_ESTADO[''];
+  const sector = mm.sectores.find(s => s.nombre === i.sector) || { peso: 0 };
+  const orden = [...mm.industrias].sort((a, b) => b.peso - a.peso);
+  const puesto = orden.findIndex(x => x === i) + 1;
+  const pesoTxt = i.peso > 0
+    ? `<b>${pctEs(i.peso, 2)}</b> del S&P 500<p style="margin:6px 0 0">Es la ${puesto}.ª de ${orden.length} por peso${sector.peso ? `; supone el ${pctEs(100 * i.peso / sector.peso, 0)} de su sector, que pesa el ${pctEs(sector.peso)} del índice` : ''}.</p>`
+    : `<b>0 %</b> del S&P 500<p style="margin:6px 0 0">No hay ninguna empresa de esta industria en el índice. El recuadro se dibuja con un tamaño mínimo para que se vea.</p>`;
+  const fichas = mmFichas();
+  const emp = i.empresas.map(t => {
+    const o = fichas.get(t);
+    return o ? `<a href="#/empresa/${encodeURIComponent(o.x.id)}" title="${esc(o.x.nombre)}">${esc(t)}<small>${esc({ 'Watchlist': 'watchlist', 'Quality · Growth · Value': 'QGV' }[o.origen] || o.origen)}</small></a>`
+      : `<span title="Sin ficha en el terminal">${esc(t)}</span>`;
+  }).join('');
+  const abiertas = i.fichas.map(id => (datos.industrias || []).find(x => x.id === id)).filter(Boolean);
+  const botones = abiertas.length
+    ? abiertas.map(x => `<a class="boton" href="#/industrias/${encodeURIComponent(x.id)}">Abrir ficha${abiertas.length > 1 ? ': ' + esc(x.nombre) : ''}</a>`).join('')
+    : `<span class="boton" aria-disabled="true">${i.estado === 'hecha' ? 'Ficha hecha, aún no está en el terminal' : 'Sin ficha todavía'}</span>`;
+  panel.innerHTML = `<div class="rotulo">${esc(i.sector)}${i.grupo && i.grupo !== i.sector ? ' · ' + esc(i.grupo) : ''}</div>
+    <h3>${esc(i.nombre)}</h3>${i.nombre_en && i.nombre_en.toLowerCase() !== i.nombre.toLowerCase() ? `<div class="en">En inglés: ${esc(i.nombre_en)}</div>` : ''}
+    <span class="estado-ficha" style="background:${e.c}22;color:var(--texto)"><i style="background:${e.c}"></i>${esc(e.t)}</span>
+    <div class="botones">${botones}</div>
+    <div class="bloque peso"><div class="rotulo">Peso en el índice</div>${pesoTxt}</div>
+    ${i.mayores.length ? `<div class="bloque"><div class="rotulo">Las mayores del S&P 500</div>${esc(i.mayores.join(' · '))}</div>` : ''}
+    <div class="bloque"><div class="rotulo">Tus empresas</div>${emp ? `<div class="chips">${emp}</div>` : 'Ninguna, ni en cartera ni en watchlist.'}</div>
+    ${i.subindustrias.length ? `<div class="bloque"><div class="rotulo">${i.subindustrias.length === 1 ? 'Qué incluye' : `Sus ${i.subindustrias.length} subindustrias`}</div>
+      <ul class="subs">${i.subindustrias.map(s => `<li><b>${esc(s.nombre)}</b>${esc(s.definicion)}</li>`).join('')}</ul></div>` : ''}`;
+}
+function activarMapaMercado() {
+  if (!document.getElementById('mm')) return;
+  mmDibujar(); mmPanel();
+  if (!window._mmRedim) {
+    window._mmRedim = true;
+    let t, ancho = window.innerWidth;
+    window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => {
+      if (window.innerWidth !== ancho) { ancho = window.innerWidth; mmDibujar(); } }, 150); });
+  }
+}
+// La ficha HTML se descifra y se pinta dentro de la página, a toda su altura; los
+// enlaces de su índice mueven la página, no el marco.
+async function cargarFicha(marco) {
+  const estado = document.getElementById('estado-ficha');
+  try {
+    marco.src = await urlDe(marco.dataset.ficha, 'text/html');
+    marco.addEventListener('load', () => {
+      const doc = marco.contentDocument;
+      if (!doc) return;
+      doc.documentElement.setAttribute('data-theme', 'light');
+      const ajustar = () => { marco.style.height = doc.documentElement.scrollHeight + 'px'; };
+      ajustar(); setTimeout(ajustar, 600); setTimeout(ajustar, 2000);
+      doc.querySelectorAll('img').forEach(im => im.addEventListener('load', ajustar));
+      const nav = doc.querySelector('nav.top'); if (nav) nav.style.position = 'static';
+      doc.addEventListener('click', ev => {
+        const a = ev.target.closest('a[href^="#"]');
+        if (!a) return;
+        const destino = doc.getElementById(decodeURIComponent(a.getAttribute('href').slice(1)));
+        if (!destino) return;
+        ev.preventDefault();
+        window.scrollTo({ top: marco.getBoundingClientRect().top + window.scrollY + destino.getBoundingClientRect().top - 12, behavior: 'smooth' });
+      });
+    }, { once: true });
+    marco.hidden = false; estado.hidden = true;
+  } catch (e) {
+    console.error(e);
+    estado.textContent = 'No se ha podido abrir la ficha. Prueba con «Abrir en pestaña nueva» o con el PDF.';
+  }
+}
+function activarIndustrias() {
+  activarMapaMercado();
+  activarMapa();
+  document.querySelectorAll('.ind-filtros button[data-fam]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.ind-filtros button[data-fam]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    document.querySelectorAll('.ind-tarjeta').forEach(t => { t.hidden = !!b.dataset.fam && t.dataset.familia !== b.dataset.fam; });
+  }));
+  document.querySelectorAll('figure[data-ampliar]').forEach(f => f.addEventListener('click', () => {
+    const im = f.querySelector('img'); if (im && im.src) window.open(im.src, '_blank');
+  }));
+  const marco = document.querySelector('iframe[data-ficha]');
+  if (marco) cargarFicha(marco);
+  const ir = document.querySelector('[data-ficha-ir]');
+  if (ir) ir.addEventListener('click', () => document.getElementById('ficha-completa').scrollIntoView({ behavior: 'smooth' }));
+}
+
+const pct = (v, d = 1) => (v === null || v === undefined || v === '') ? '—' : (v * 100).toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d }) + ' %';
+const precio = v => (v === null || v === undefined || v === '') ? '—' : Number(v).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const COLOR_ESTR = ['#2E5F73', '#8E6A2F', '#2E4D73', '#A89B84'];
+const TIPO = { 'Cierre': 'estado--rojo', 'Cierre excision': 'estado--rojo', 'Reducción': 'estado--ambar', 'Compra': 'estado--verde', 'Ampliación': 'estado--verde' };
+
+const COLOR_POR_ESTR = { 'Dividendos': '#2E5F73', 'Quality · Growth · Value': '#8E6A2F', 'Alpha': '#2E4D73' };
+const colorEstr = (nombre, i) => COLOR_POR_ESTR[nombre] || COLOR_ESTR[i % 4];
+function cartera() {
+  const c = datos.cartera;
+  if (!c) return '<div class="rotulo">Cartera · pesos y movimientos</div><h1>En preparación</h1><p class="entradilla">Aquí irán los pesos por estrategia y por empresa, y los movimientos. Sin importes, número de acciones ni precio medio.</p>';
+  const idDe = nombre => (datos.estrategias.find(x => x.titulo === nombre) || {}).id;
+  const fichas = new Set(datos.estrategias.flatMap(e => e.empresas.map(x => x.ticker)));
+  const reparto = c.reparto.map((r, i) => {
+    const id = idDe(r.estrategia);
+    const dentro = `<span class="rotulo">${esc(r.estrategia)}</span><span class="cifra">${pct(r.peso)}</span><small>${esc(r.n)} ${r.estrategia === 'Tendencial' ? 'activos' : 'empresas'}${id ? ' · ver la estrategia →' : ''}</small>`;
+    return id ? `<a href="#/estrategias/${id}" style="background:${colorEstr(r.estrategia, i)}">${dentro}</a>` : `<a style="background:${colorEstr(r.estrategia, i)}">${dentro}</a>`;
+  }).join('');
+  const bloques = c.estrategias.map((e, i) => {
+    const color = colorEstr(e.estrategia, i);
+    const r = c.reparto.find(x => x.estrategia === e.estrategia);
+    const max = Math.max(...e.empresas.map(x => x.peso || 0)) || 1;
+    const filas = e.empresas.map(x => {
+      const nombre = x.nombre || x.empresa;
+      const n = x.ticker && fichas.has(x.ticker) ? `<a class="nombre-empresa" href="#/empresa/${encodeURIComponent(x.ticker)}">${esc(nombre)}</a>` : `<span class="nombre-empresa">${esc(nombre)}</span>`;
+      return `<div class="fila"><div>${n}<small>${esc(x.sector)} · ${esc(x.mercado)}</small><small class="objetivo-movil">Precio ${precio(x.precio)} · objetivo ${precio(x.objetivo)}</small></div>
+        <div class="peso"><i style="width:${(x.peso || 0) / max * 80}%;background:${color}"></i><strong class="peso-estr">${pct(x.peso)}</strong></div>
+        <div class="num">${pct(x.peso_total)}</div><div class="num precio">${precio(x.precio)}</div><div class="num precio">${precio(x.objetivo)}</div>
+        <div class="tir${x.retorno == null ? ' tir--nada' : x.retorno < 0 ? ' tir--negativa' : ''}">${pct(x.retorno)}</div></div>`;
+    }).join('');
+    return `<div class="panel posiciones"><div class="panel-cab" style="border-left:6px solid ${color}"><h2>${esc(e.estrategia)}</h2><span style="font:300 32px var(--titular);color:${color}">${r ? pct(r.peso) : ''} <span class="nota-gris">del total · ${e.empresas.length} empresas</span></span></div>
+      <div class="cab"><span>Empresa</span><span>Peso en la estrategia</span><span>Peso total</span><span>Precio</span><span>${esc(e.horizonte)}</span><span>Rentabilidad total anual · ${esc(horizonteCorto(idDe(e.estrategia)))}</span></div>${filas}</div>`;
+  }).join('');
+  const movs = c.movimientos.length ? `<h2>Movimientos</h2><div class="tabla-caja"><table><thead><tr><th>Fecha</th><th>Empresa</th><th>Cartera</th><th>Tipo</th></tr></thead>
+      <tbody>${c.movimientos.map(m => `<tr><td>${esc(m.fecha)}</td><td style="font:15px var(--serif)">${esc(m.empresa)}</td><td>${esc(m.cartera)}</td><td><span class="estado ${TIPO[m.tipo] || 'estado--nada'}">${esc(m.tipo)}</span></td></tr>`).join('')}</tbody></table></div>`
+    : '<h2>Movimientos</h2><p class="vacio" style="margin-top:0">Los movimientos se publican a partir de enero de 2027.</p>';
+  return `<div class="rotulo">Cartera · pesos y movimientos</div><h1>Cómo está repartida</h1>
+    <p class="entradilla">Solo pesos, sin importes, sobre el total de Dividendos, Quality · Growth · Value y Alpha.</p>
+    <div class="reparto">${reparto}</div>
+    ${bloques}
+    <p class="nota-gris" style="margin-top:14px">Posiciones a ${esc(c.posiciones_a)}. Pesos calculados a ${esc(c.precios_a)}. Los precios y sus fechas individuales se detallan en Estrategias. Objetivos del caso central de la última valoración publicada; rentabilidad total anual con los dividendos previstos por el modelo hasta la fecha de venta de cada valoración, que se detalla en Estrategias. «—» indica valoración pendiente o en revisión.${c.cambios_congelados ? ' Tipos de cambio guardados: ' + esc(c.cambios_congelados) + '.' : ''}</p>
+    ${movs}`;
+}
+
+function metodo() {
+  return `<div class="rotulo">Método</div><div class="prosa">${datos.metodo || '<h1>En preparación</h1>'}</div>`;
+}
+
+// ---------- salida privada: biblioteca, radar y opiniones (fase 3, 08/11/2026) ----------
+const isoDmy = f => f.slice(8, 10) + '/' + f.slice(5, 7) + '/' + f.slice(0, 4);
+const fechaBib = f => !f ? 'sin fecha' : f.length === 10 ? isoDmy(f) : f.length === 7 ? f.slice(5) + '/' + f.slice(0, 4) : f;
+const enlaceExterno = (url, texto, clase) => /^https?:\/\//.test(url || '')
+  ? `<a${clase ? ` class="${clase}"` : ''} href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(texto)}</a>` : esc(texto);
+function fuenteBib(f) {
+  return enlaceExterno(f.url, f.autor) + ' · ' + (f.fecha_desconocida ? 'sin fecha' : fechaBib(f.fecha))
+    + (f.de_pago ? '<span class="chip chip--pago">de pago</span>' : '');
+}
+function argumento(a) {
+  return `<div class="argumento">${a.tema ? `<span class="tema">${esc(a.tema)}</span>` : ''}<h4>${esc(a.titulo)}</h4>
+    <p>${esc(a.resumen)}</p><p class="fuentes">${a.fuentes.map(fuenteBib).join('<br>')}</p></div>`;
+}
+// Panel «Qué dicen otros»: en la ficha, tres argumentos por lado; en su página, todos.
+function panelOpiniones(clave, completo) {
+  const b = clave && datos.privado.empresas[clave];
+  if (!b) return completo ? '' : '<h2>Qué dicen otros</h2><p class="vacio">La biblioteca todavía no tiene análisis de esta empresa.</p>';
+  const r = b.recuento, max = completo ? Infinity : 3;
+  const lado = (l, titulo) => {
+    const xs = b.argumentos.filter(a => a.lado === l);
+    return `<div class="lado lado--${l}"><h3>${titulo} · ${xs.length}</h3>${xs.slice(0, max).map(argumento).join('') || '<p class="vacio">Ninguno recogido.</p>'}
+      ${xs.length > max ? `<p class="nota-gris">y ${xs.length - max} más</p>` : ''}</div>`;
+  };
+  return `<section class="opiniones"><h2>Qué dicen otros</h2>
+    <p class="recuento">${r.alcistas} alcistas · ${r.bajistas} bajistas · ${r.documentos} documentos · último ${fechaBib(r.ultima)}${b.fecha_revision ? ' · revisado ' + fechaBib(b.fecha_revision) : ''}</p>
+    ${b.debate ? `<p class="debate${b.debate.length > 280 ? ' debate--largo' : ''}">${esc(b.debate)}</p>` : ''}
+    <div class="lados">${lado('alcista', 'Alcistas')}${lado('bajista', 'Bajistas')}</div>
+    ${completo && b.vigilancia.length ? `<h2>Qué vigilar</h2><ul class="vigilancia">${b.vigilancia.map(v => `<li>${esc(v)}</li>`).join('')}</ul>` : ''}
+    <div class="botones" style="margin-top:18px">${completo ? '' : `<a class="boton boton--suave" href="#/otros/${encodeURIComponent(clave)}">Ver todos los argumentos</a>`}
+      <a class="boton boton--suave" href="#/biblioteca/empresa/${encodeURIComponent(b.empresa_id)}">Abrir en la Biblioteca</a></div></section>`;
+}
+function otros(clave) {
+  const b = datos.privado.empresas[clave];
+  if (!b) return '<h1>Esa empresa no está en la biblioteca</h1>';
+  const ficha = todas().find(o => o.x.bib === clave);
+  const estr = [...new Set(b.estrategias.map(p => p.estrategia + (p.estado ? ' · ' + p.estado : '')))];
+  return `<a class="volver" href="${ficha ? '#/empresa/' + encodeURIComponent(ficha.x.id) : '#/biblioteca'}">← ${ficha ? 'Volver a la ficha' : 'Volver a la Biblioteca'}</a>
+    <div class="rotulo" style="margin-top:8px">Biblioteca · ${estr.map(esc).join(' · ')}</div>
+    <h1>${esc(b.nombre)} <span class="ticker" style="font-size:14px">${esc(clave)}</span></h1>
+    ${panelOpiniones(clave, true)}`;
+}
+function radar() {
+  const p = datos.privado, items = p.radar;
+  const fichas = new Map(todas().map(o => [o.x.bib, o.x.id]));
+  const chip = t => {
+    const ruta = fichas.has(t) ? '#/empresa/' + encodeURIComponent(fichas.get(t)) : p.empresas[t] ? '#/otros/' + encodeURIComponent(t) : null;
+    return ruta ? `<a href="${ruta}">${esc(t)}</a>` : `<span class="chip">${esc(t)}</span>`;
+  };
+  const dias = [...new Set(items.map(x => x.fecha))];
+  const cuerpo = dias.map(d => `<h2>${esc(isoDmy(d))}</h2>${items.filter(x => x.fecha === d).map(x => `<div class="radar-item">
+      <div>${enlaceExterno(x.url, x.titulo || '(sin título)', 'titulo')}
+        <div class="meta">${esc(x.fuente)} · ${esc(x.tipo)}${x.leido ? '' : '<span class="chip chip--nuevo">sin leer</span>'}${x.de_pago ? '<span class="chip chip--pago">de pago</span>' : ''}</div></div>
+      <div class="tickers">${x.tickers.map(chip).join('')}</div></div>`).join('')}`).join('');
+  return `<div class="rotulo">Biblioteca · radar</div><h1>Lo entrado esta semana</h1>
+    <p class="entradilla">${items.length} textos desde el ${esc(isoDmy(p.radar_desde))} sobre empresas que la biblioteca sigue. Sin vídeos ni resultados de búsqueda sin leer.${p.radar_recortado ? ` Se han quedado fuera ${p.radar_recortado} por el tope.` : ''}</p>
+    ${cuerpo || '<p class="vacio">Nada nuevo esta semana.</p>'}`;
+}
+function biblioteca(_, resto) {
+  const ruta = (resto || []).join('/');
+  return `<div class="rotulo">Biblioteca · edición del ${esc(fechaMercado(datos.privado.edicion.generado))}</div><h1>Lo que dicen otros</h1>
+    <p class="entradilla">La edición completa, con su buscador y sus filtros. La primera vez tarda unos segundos en abrir.</p>
+    <p class="nota-gris" id="estado-bib">Descargando y descifrando la biblioteca…</p>
+    <iframe class="marco-bib" title="Biblioteca Walker" data-edicion data-ruta="${esc(ruta)}" hidden></iframe>`;
+}
+// La edición se descarga solo al abrir esta pestaña. Va en un iframe del mismo
+// origen (blob:) para que conserve las preferencias que guarda en este navegador.
+async function cargarEdicion(marco) {
+  const estado = document.getElementById('estado-bib');
+  try {
+    const url = await urlDe(datos.privado.edicion.f, 'text/html');
+    marco.src = url + (marco.dataset.ruta ? '#/' + marco.dataset.ruta : '');
+    marco.hidden = false; estado.hidden = true;
+  } catch (e) {
+    console.error(e);
+    estado.textContent = 'No se ha podido abrir la biblioteca. Vuelve a intentarlo; si sigue, sal y vuelve a entrar.';
+  }
+}
+
+// ---------- Repaso de tesis (09/11/2026; versión visual del 10/11/2026) ----------
+// Una vista de la tesis vigente y sus seguimientos posteriores (contrato en
+// _terminal/REPASO.md). El precio, la rentabilidad de hoy y el precio para el
+// 15 % salen de la misma fila que la tabla de Estrategias: nunca se contradicen.
+// Jose (10/11/2026): sin contador ni variables descartadas, y un solo visto
+// bueno por ficha («validada»): lo da al confirmar las variables que le propongo.
+const RP_ESTADO = { intacta: 'Intacta', bajo_presion: 'Bajo presión', en_vigilancia: 'En vigilancia' };
+const RP_VEREDICTO = { confirma: 'Confirma', debilita: 'Debilita', no_toca: 'No toca' };
+const RP_CORTO = { div: 'Dividendos', qgv: 'QGV', alpha: 'Alpha' };
+const pp = v => (v === null || v === undefined) ? '—' : Number(v).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' %';
+function conRepaso() { return todas().filter(o => o.x.repaso); }
+function filaTabla(ticker) {
+  for (const e of datos.estrategias) { const f = (e.tabla || []).find(x => x.ticker === ticker); if (f) return f; }
+  return null;
+}
+function estrategiaDe(x) {
+  const e = datos.estrategias.find(e => e.empresas.includes(x));
+  return e ? RP_CORTO[e.id] : 'Watchlist';
+}
+const rpCuenta = (r, valor) => r.variables.filter(v => v.estado && v.estado.valor === valor).length;
+// Orden de la portada: proporción de variables bajo presión y, a igualdad, en vigilancia.
+const rpPresion = r => (rpCuenta(r, 'bajo_presion') + rpCuenta(r, 'en_vigilancia') / 10) / r.variables.length;
+function rpEstado(est) {
+  if (!est) return '<span class="rp-est nada">Sin estado</span>';
+  return `<span class="rp-est ${esc(est.valor)}">${esc(RP_ESTADO[est.valor] || est.valor)}</span>`;
+}
+function repaso(id) { return id ? repasoEmpresa(id) : repasoPortada(); }
+
+// Portada (Jose, 10/11/2026): una tabla por estrategia con un titular de lo que
+// pasa en cada tesis, para animar a entrar en la ficha, y el calendario en una línea.
+const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sept', 'oct', 'nov', 'dic'];
+function rpVeredictos(r) {
+  const n = { confirma: 0, debilita: 0 };
+  (r.linea_tiempo || []).forEach(h => (h.efectos || []).forEach(e => { if (e.veredicto in n) n[e.veredicto]++; }));
+  const partes = [];
+  if (n.debilita) partes.push(`<span class="dn">↓</span> ${n.debilita} ${n.debilita === 1 ? 'debilita' : 'debilitan'}`);
+  if (n.confirma) partes.push(`<span class="up">↑</span> ${n.confirma} ${n.confirma === 1 ? 'confirma' : 'confirman'}`);
+  return partes.length ? partes.join(' · ') : 'sin hechos nuevos desde la tesis';
+}
+function rpHoy(x, div) {
+  // Rentabilidad al precio de hoy (la de la tabla de Estrategias); si no la hay, la del caso central de la tesis.
+  const t = filaTabla(x.ticker), ti = x.repaso.tesis_inversion || {};
+  const vara = div ? 'pide 8–10 %' : 'pide 15 %';
+  let v = t && t.retorno != null ? t.retorno * 100 : null, nota = vara;
+  if (v == null && ti.central != null) { v = ti.central; nota = 'tesis · ' + vara; }
+  if (v == null) return '<span class="rp-hoy">—<small>pendiente</small></span>';
+  const cls = v >= (div ? 10 : 15) ? 'ok' : (div && v >= 8 ? 'medio' : 'bajo');
+  return `<span class="rp-hoy ${cls}">${pp(v)}<small>${esc(nota)}</small></span>`;
+}
+function rpProximo(r) {
+  const h = [...(r.proximos_hechos || [])].sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)))[0];
+  return h ? esc(h.etiqueta) : '—';
+}
+function repasoPortada() {
+  const grupos = datos.estrategias.map(e => ({ titulo: e.titulo, div: e.id === 'div', xs: e.empresas.filter(x => x.repaso) }))
+    .concat([{ titulo: 'Watchlist', div: false, xs: datos.watchlist.filter(x => x.repaso) }])
+    .filter(g => g.xs.length);
+  const tabla = grupos.map(g => {
+    const filas = [...g.xs].sort((a, b) => rpPresion(b.repaso) - rpPresion(a.repaso) || a.nombre.localeCompare(b.nombre)).map(x => {
+      const r = x.repaso;
+      const puntos = r.variables.map(v => `<i class="${v.estado ? esc(v.estado.valor) : ''}" title="${esc(v.nombre)}"></i>`).join('');
+      return `<a class="rp-fila" href="#/repaso/${encodeURIComponent(x.id)}"><span class="tk">${esc(x.ticker)}</span>
+        <span class="ti">${esc(r.titular || x.nombre)}<small>${rpVeredictos(r)}${r.desactualizado ? ' · falta el último seguimiento' : ''}</small></span>
+        <span class="pt">${puntos}</span>${rpHoy(x, g.div)}<span class="px">${rpProximo(r)}</span></a>`;
+    }).join('');
+    return `<div class="rp-grupo"><span>${esc(g.titulo)}</span><span>${g.xs.length} ${g.xs.length === 1 ? 'tesis' : 'tesis'}</span></div>${filas}`;
+  }).join('');
+  // Calendario: los próximos hechos de todas las fichas, agrupados por mes.
+  const porMes = {};
+  conRepaso().forEach(o => (o.x.repaso.proximos_hechos || []).forEach(h => {
+    const m = String(h.fecha).slice(0, 7);
+    if (/^\d{4}-\d{2}$/.test(m)) (porMes[m] = porMes[m] || new Set()).add(o.x.ticker);
+  }));
+  const meses = Object.keys(porMes).sort().slice(0, 4);
+  const cal = meses.map(m => `<span><b>${MESES[+m.slice(5, 7) - 1]}</b> ${[...porMes[m]].map(esc).join(' · ')}</span>`).join('');
+  return `<div class="rp-hoja"><div class="rp-tarjeta">
+    <h1 class="rp-titulo">Repaso de tesis</h1>
+    <p class="rp-sub">Qué está pasando en cada tesis. Toca una fila para abrir su ficha.</p>
+    <div class="rp-cabtab"><span></span><span>Qué está pasando</span><span>Variables</span><span>Hoy</span><span>Próxima</span></div>
+    ${tabla}
+    ${cal ? `<div class="rp-cal">${cal}</div>` : ''}
+    <p class="rp-pista"><i class="bajo_presion"></i> bajo presión · <i class="en_vigilancia"></i> en vigilancia · <i class="intacta"></i> intacta</p></div></div>`;
+}
+
+function repasoEmpresa(id) {
+  const o = conRepaso().find(o => o.x.id === id);
+  if (!o) return '<h1>Esa empresa no tiene repaso</h1><p class="entradilla"><a href="#/repaso">Volver al repaso</a></p>';
+  const x = o.x, r = x.repaso, t = filaTabla(x.ticker), tn = r.tesis_negocio || {}, ti = r.tesis_inversion || {};
+  const nombreVar = vid => (r.variables.find(v => v.id === vid) || {}).nombre || vid;
+  const variables = r.variables.map(v => `<details class="rp-var"><summary><span>${esc(v.nombre)}${v.termino ? `<small class="rp-term">(${esc(v.termino)})</small>` : ''}</span>${rpEstado(v.estado)}</summary>
+    <div class="det">${v.pregunta ? `<p><strong>${esc(v.pregunta)}</strong></p>` : ''}<p>${esc(v.por_que)}</p>
+      ${v.ultimo_dato ? `<p><strong>Último dato.</strong> ${esc(v.ultimo_dato)}</p>` : ''}
+      ${(v.indicadores || []).length ? `<div class="tabla-caja"><table><thead><tr><th>Qué mirar</th><th>Cuándo</th><th>Peor</th><th>Mejor</th></tr></thead>
+        <tbody>${v.indicadores.map(i => `<tr><td>${esc(i.que)}${i.termino ? `<small class="rp-term">(${esc(i.termino)})</small>` : ''}</td><td>${esc(i.cuando)}</td><td>${esc(i.conservador)}</td><td>${esc(i.favorable)}</td></tr>`).join('')}</tbody></table></div>` : ''}
+      ${v.rompe ? `<div class="rp-rompe"><strong>Lo que la rompería.</strong> ${esc(v.rompe)}</div>` : ''}</div></details>`).join('');
+  const proximo = (r.proximos_hechos || [])[0];
+  const hechos = (r.linea_tiempo || []).map(h => `<div class="rp-hecho"><div class="t">${esc(isoDmy(h.fecha))} · ${esc(h.hecho)}</div>
+      ${h.efectos.map(e => `<div class="rp-efecto ${esc(e.veredicto)}">${esc(RP_VEREDICTO[e.veredicto])} · ${esc(nombreVar(e.variable))}: ${esc(e.lineas)}</div>`).join('')}</div>`).join('');
+  const tiempo = `<details class="rp-tiempo"><summary>${proximo ? 'Próximo hecho: ' + esc(proximo.hecho) + ', ' + esc(proximo.etiqueta.toLowerCase()) + ' · ' : ''}<b>ver línea de tiempo ›</b></summary>
+    ${(r.proximos_hechos || []).length > 1 ? `<div class="rp-sec" style="margin-top:12px">Próximos hechos</div>${r.proximos_hechos.map(h => `<div class="rp-ag"><span class="f">${esc(h.etiqueta)}</span><span>${esc(h.hecho)}</span></div>`).join('')}` : ''}
+    <div class="rp-sec" style="margin-top:16px">Lo que ha pasado</div>${hechos || '<p class="rp-nota" style="margin-top:0">Nada registrado todavía después de la tesis.</p>'}</details>`;
+  const d = r.direccion || {};
+  const ejes = (d.ejes || []).map(e => `<div class="rp-eje" title="${esc(e.eje + '. ' + e.texto)}"><i class="${esc(e.estado)}"></i><span>${esc(e.corto || e.texto)}</span></div>`).join('');
+  // Hasta dos promesas a la vista; si hay más, se dice cuántas quedan (Jose, 10/11/2026: «(y 1 más)» no se entendía).
+  const ps = d.promesas_abiertas || [];
+  const promesas = ps.slice(0, 2).map(p => `<p class="rp-promesa">Promesa abierta: ${esc(p.promesa)} · ${esc(p.se_resuelve)}</p>`).join('')
+    + (ps.length > 2 ? `<p class="rp-promesa">Y ${ps.length - 2} promesa${ps.length - 2 > 1 ? 's' : ''} más en la tesis.</p>` : '');
+  // Quién pone dinero (Jose, 10/11/2026): insiders siempre, con el neto por año en barras;
+  // grandes gestores solo si pasan los filtros de REPASO.md. Contexto, nunca evidencia.
+  const ci = d.compras_insiders, gs = d.gestores || [];
+  let insiders = '';
+  if (ci && (ci.por_ano || []).length) {
+    const max = Math.max(...ci.por_ano.map(a => Math.abs(a.neto))) || 1;
+    const ult = ci.por_ano[ci.por_ano.length - 1].ano;
+    const n = v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toLocaleString('es-ES');
+    insiders = `<div class="rp-ins"><div class="tit">${esc(ci.titulo || 'Compras de insiders')}</div><p class="res">${esc(ci.resumen)}</p>
+      <div class="rp-barras" role="img" aria-label="Compras menos ventas de insiders por año">${ci.por_ano.map(a => `<div class="${a.ano === ult ? 'ultimo' : ''}${a.neto < 0 ? ' neg' : ''}"><em>${n(a.neto)}</em><b style="height:${Math.max(2, Math.abs(a.neto) / max * 70)}px"></b>${a.ano}</div>`).join('')}</div>
+      <p class="rp-nota" style="margin-top:6px">Compras menos ventas declaradas, en ${esc(ci.unidad || 'millones')}.${ci.ultima ? ' Última: ' + esc(ci.ultima) : ''}</p>
+      <details><summary>ver detalle ›</summary><div class="tabla-caja"><table><thead><tr><th>Año</th><th>Compras</th><th>Ventas</th><th>Neto</th>${ci.por_ano.some(a => a.en_bolsa != null) ? '<th>En bolsa</th>' : ''}</tr></thead>
+        <tbody>${ci.por_ano.map(a => `<tr><td>${a.ano}</td><td>${a.compras.toLocaleString('es-ES')}</td><td>${a.ventas.toLocaleString('es-ES')}</td><td>${n(a.neto)}</td>${a.en_bolsa != null ? `<td>${a.en_bolsa}</td>` : ''}</tr>`).join('')}</tbody></table></div>
+        ${ci.precedente ? `<p class="rp-nota">${esc(ci.precedente)}</p>` : ''}${ci.cautela ? `<p class="rp-nota">${esc(ci.cautela)}</p>` : ''}${ci.fuente ? `<p class="rp-nota">Fuente: ${esc(ci.fuente)}</p>` : ''}</details></div>`;
+  }
+  const gestores = gs.map(g => `<div class="rp-ins"><div class="tit">${esc(g.nombre)}</div><p class="res">${esc(g.que)}</p>
+      <p class="rp-nota">Dato a ${esc(isoDmy(g.fecha_dato))}. ${esc(g.retraso || '')}${g.fuente ? ' Fuente: ' + esc(g.fuente) + '.' : ''}</p></div>`).join('');
+  const dinero = insiders || gestores ? `<div class="rp-sec" style="margin-top:18px">Quién pone dinero</div>${insiders}${gestores}` : '';
+  // Valoración viva: el precio de hoy frente al de la tesis y al precio para el 15 %.
+  let viva = '<p class="rp-nota">Sin rentabilidad publicada para el precio de hoy.</p>';
+  if (t && t.precio != null) {
+    // La vara de cada estrategia: Dividendos pide un 8 % mínimo y un 10 % objetivo; las demás, un 15 %.
+    const div = datos.estrategias.some(e => e.id === 'div' && e.empresas.includes(x));
+    const varas = div ? [[t.precio_8, '8 %'], [t.precio_10, '10 %']] : [[t.precio_15, '15 %']];
+    const marcas = [...varas, [ti.precio_tesis, 'tesis']].filter(([v]) => v != null);
+    const vals = [t.precio, ...marcas.map(([v]) => v)], lo = Math.min(...vals) * 0.9, hi = Math.max(...vals) * 1.08;
+    const pos = v => ((v - lo) / (hi - lo) * 100).toFixed(1);
+    viva = `<div class="rp-viva"><div class="rp-fila2"><span>Precio de hoy</span><strong>${precio(t.precio)} ${esc(t.moneda || '')}</strong></div>
+      <div class="rp-escala" role="img" aria-label="Precio de hoy frente al de la tesis y al precio para el 15 %"><div class="barra"></div>
+        ${marcas.map(([v, et]) => `<div class="m" style="left:${pos(v)}%">${et}<small><br>${precio(v)}</small></div>`).join('')}
+        <div class="hoy" style="left:${pos(t.precio)}%"></div></div>
+      <div class="rp-fila2"><span>Caso central a ese precio</span><strong>${pct(t.retorno)}</strong></div>
+      <p class="rp-nota">${div ? `El central da un 8 % por debajo de ${precio(t.precio_8)} ${esc(t.moneda || '')} y un 10 % por debajo de ${precio(t.precio_10)} ${esc(t.moneda || '')}.` : `Por debajo de ${precio(t.precio_15)} ${esc(t.moneda || '')} el central daría un 15 %.`} Precio a ${esc(fechaMercado(t.fecha_precio))}${!t.actualizado ? ' (dato guardado)' : ''}.</p></div>`;
+  }
+  // Tabla de fundamentales (Jose, 10/11/2026): la imagen que deja el seguimiento, si la hay.
+  let sec = 2;
+  const fund = r.fundamentales ? `<div class="rp-sec">${++sec} · Fundamentales</div>
+    <img class="rp-fund" data-img="${esc(r.fundamentales.f)}" data-tipo="image/png" alt="Tabla de fundamentales de ${esc(x.nombre)}">
+    <p class="rp-nota">Tabla del ${esc(r.fundamentales.fecha)}. Tócala para verla en grande. Las lecturas en color se calculan por regla; las marcadas con ✎ son juicio.</p>` : '';
+  return `<a class="volver" href="#/repaso">← Repaso</a>
+    <div class="rp-hoja"><div class="rp-tarjeta">
+    <div class="rp-cab"><h1 class="rp-titulo">${esc(x.nombre)} · ${esc(x.ticker)} · ${esc(estrategiaDe(x))}</h1><span class="fecha">Tesis ${esc(isoDmy(r.tesis.fecha))}</span></div>
+    ${!r.validada ? '<p class="rp-nota" style="margin-top:12px">Pendiente de tu visto bueno.</p>' : ''}
+    ${r.desactualizado ? '<div class="rp-rompe" style="margin-top:14px">Este repaso no recoge todavía el último seguimiento publicado.</div>' : ''}
+    <div class="rp-sec">1 · Las dos tesis</div>
+    <div class="rp-dos"><div class="rp-caja"><div class="et">Negocio</div><div class="v ${tn.estado ? esc(tn.estado.valor) : ''}">${tn.estado ? esc(RP_ESTADO[tn.estado.valor]) : '—'}</div><div class="d">${esc(tn.datos || '')}</div></div>
+      <div class="rp-caja"><div class="et">Inversión</div>${ti.central == null
+        ? `<div class="v">Valoración pendiente</div><div class="d">${esc(ti.frase || '')}</div>`
+        : `<div class="v">${pp(ti.central)} central</div><div class="d">Rango ${pp((ti.rango || [])[0])} a ${pp((ti.rango || [])[1])}</div>`}</div></div>
+    <div class="rp-sec">2 · Variables críticas</div>${variables}${tiempo}
+    ${fund}
+    ${ejes || promesas || dinero ? `<div class="rp-sec">${++sec} · Dirección${d.quien ? ' · ' + esc(d.quien) : ''}</div>${ejes}${promesas}${dinero}` : ''}
+    <div class="rp-sec">${++sec} · Valoración viva</div>${viva}
+    </div>
+    <div class="botones" style="margin-top:16px">${boton(x.tesis[0].f, 'Tesis vigente (PDF)', 'boton--suave boton--peq')}
+      <a class="boton boton--suave boton--peq" href="#/empresa/${encodeURIComponent(x.id)}">Todos los documentos</a></div></div>`;
+}
+
+// Tuberías (17/11/2026, solo privada): cómo fluye el dinero. Portada con cada
+// tubería dibujada en columnas (entra, lo gastan, se lo pagan), zona de caza y
+// panel de variables; el texto largo, plegado en su propia página.
+const TB_COLOR = {
+  tranquilo: ['var(--papel-2)', 'var(--linea-2)', 'var(--gris)', 1],
+  neutro: ['var(--blanco)', 'var(--linea-2)', 'var(--texto)', 1],
+  cuello: ['var(--verde-f)', '#3B5A2C', 'var(--verde-t)', 2.5],
+  presion: ['var(--ambar-f)', '#B08A3E', 'var(--ambar-t)', 1.2],
+  debil: ['var(--rojo-f)', '#B5654F', 'var(--rojo-t)', 1.2]
+};
+function svgTuberia(t) {
+  const CW = 156, GAP = 44, RH = 46, RG = 12, X0 = 6, Y0 = 30;
+  const pos = {};
+  let maxF = 0;
+  t.columnas.forEach((c, ci) => c.cajas.forEach(b => {
+    const h = b.hasta ?? b.fila;
+    maxF = Math.max(maxF, h);
+    const x = X0 + ci * (CW + GAP), y = Y0 + b.fila * (RH + RG);
+    pos[b.id] = { b, x, y, w: CW, h: (h - b.fila + 1) * RH + (h - b.fila) * RG };
+  }));
+  const W = X0 * 2 + t.columnas.length * CW + (t.columnas.length - 1) * GAP;
+  const H = Y0 + (maxF + 1) * (RH + RG) + 4;
+  const tit = t.columnas.map((c, ci) => c.titulo ? `<text x="${X0 + ci * (CW + GAP)}" y="16" style="font:600 11px var(--sans);letter-spacing:.08em;fill:var(--gris)">${esc(c.titulo.toUpperCase())}</text>` : '').join('');
+  const fl = (t.flechas || []).map(f => {
+    const a = pos[f.de], b = pos[f.a];
+    if (!a || !b) return '';
+    const derecha = b.x > a.x;
+    const x1 = derecha ? a.x + a.w : a.x, x2 = derecha ? b.x - 3 : b.x + b.w + 3;
+    const ya = a.y + a.h / 2, yb = b.y + b.h / 2;
+    const estilo = f.tipo === 'circular' ? 'stroke:#B5654F;stroke-dasharray:4 3' : 'stroke:var(--gris)';
+    let d;
+    if (ya > b.y + 8 && ya < b.y + b.h - 8) d = `M${x1} ${ya} H${x2}`;
+    else { const mx = derecha ? b.x - 18 : b.x + b.w + 18; d = `M${x1} ${ya} H${mx} V${yb} H${x2}`; }
+    return `<path d="${d}" fill="none" style="${estilo};stroke-width:1.2" marker-end="url(#tb-flecha)"/>`;
+  }).join('');
+  const cajas = Object.values(pos).map(({ b, x, y, w, h }) => {
+    const [f, s, tx, sw] = TB_COLOR[b.estado] || TB_COLOR.neutro;
+    const cy = y + h / 2;
+    return `<g data-caja="${esc(b.id)}" style="cursor:pointer"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" style="fill:${f};stroke:${s};stroke-width:${sw}"/>
+      <text x="${x + w / 2}" y="${cy - (b.sub ? 6 : 0)}" text-anchor="middle" dominant-baseline="central" style="font:600 12.5px var(--sans);fill:${tx}">${esc(b.nombre)}</text>
+      ${b.sub ? `<text x="${x + w / 2}" y="${cy + 10}" text-anchor="middle" dominant-baseline="central" style="font:400 11px var(--sans);fill:${tx}">${esc(b.sub)}</text>` : ''}</g>`;
+  }).join('');
+  return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;min-width:${Math.min(W, 720)}px;display:block" role="img" aria-label="${esc(t.nombre)}">
+    <defs><marker id="tb-flecha" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="var(--gris)" stroke-width="1.5"/></marker></defs>
+    ${tit}${fl}${cajas}</svg></div>`;
+}
+function tbChip(texto, estado) {
+  const [f, s, tx] = TB_COLOR[estado] || TB_COLOR.neutro;
+  return `<span style="display:inline-block;padding:5px 10px;border-radius:6px;background:${f};border:1px solid ${s};color:${tx};font:500 12px var(--sans)">${texto}</span>`;
+}
+function tuberias(id) {
+  const docs = datos.tuberias || [], m = datos.tuberias_mapa;
+  const doc = docs.find(x => x.id === id);
+  if (doc) return `<div class="rotulo">Tuberías</div><p><a href="#/tuberias">← Volver a las tuberías</a></p><div class="prosa">${doc.html}</div>`;
+  if (!m) return '<div class="rotulo">Tuberías</div><h1>En preparación</h1>';
+  const ley = [['tranquilo', 'en el precio o tranquilo'], ['cuello', 'cuello sin descontar'], ['presion', 'depende de otro o presión'], ['debil', 'punto débil']]
+    .map(([e, t]) => tbChip(esc(t), e)).join(' ');
+  const resumen = t => { const n = {}; t.columnas.forEach(c => c.cajas.forEach(b => { n[b.estado] = (n[b.estado] || 0) + 1; }));
+    const partes = [['cuello', 'cuello sin descontar'], ['debil', 'punto débil'], ['presion', 'presión']].filter(([e]) => n[e]).map(([e, tx]) => tbChip(`${n[e]} ${tx}`, e));
+    return (t.horizonte ? tbChip('horizonte · especulación', 'neutro') + ' ' : '') + (partes.length ? partes.join(' ') : tbChip('sin tensión', 'tranquilo')); };
+  const tubs = m.tuberias.map(t => `<details style="border-top:1px solid var(--linea);padding:12px 0"${t.columnas.some(c => c.cajas.some(b => b.estado === 'cuello')) ? ' open' : ''}>
+    <summary style="cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;gap:10px"><span style="font:400 22px/1.2 var(--titular)">${esc(t.nombre)}</span>${resumen(t)}</summary><div style="margin-top:12px">
+    ${t.precio ? `<p class="nota-gris" style="margin:0 0 10px;font:13px var(--sans)">${esc(t.precio)}</p>` : ''}
+    ${svgTuberia(t)}
+    <div id="tb-det-${esc(t.id)}" class="nota-gris" style="min-height:22px;margin:8px 0;font:13px/1.5 var(--sans)">Pulsa una caja para ver su detalle.</div>
+    <p style="margin:14px 0 6px;font:600 11px var(--sans);letter-spacing:.08em;color:var(--gris)">CÓMO SE HA MOVIDO EL ATASCO</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">${(t.atasco || []).map(a => tbChip(`${esc(a.cuando)} · ${esc(a.que)}`, a.estado)).join('<span style="color:var(--gris)">→</span>')}</div>
+    <p style="margin:12px 0 0;font:14px/1.5 var(--sans)"><strong>Una sola apuesta.</strong> ${esc(t.apuesta || '')}</p>
+    <p style="margin:8px 0 0"><a class="boton boton--suave boton--peq" href="#/tuberias/${encodeURIComponent(t.detalle)}">Ver el detalle</a></p></div></details>`).join('');
+  const nombreCaja = idc => { for (const t of m.tuberias) for (const c of t.columnas) for (const b of c.cajas) if (b.id === idc) return `${t.nombre} · ${b.nombre}`; return idc; };
+  const filaCon = c => `<div style="margin:6px 0">${tbChip(esc(nombreCaja(c.de)) + ' ↔ ' + esc(nombreCaja(c.a)), c.tipo === 'tension' ? 'presion' : 'tranquilo')} <span style="font:13px var(--sans);color:var(--texto-2)">${esc(c.texto)}</span></div>`;
+  const conT = (m.conexiones || []).filter(c => c.tipo === 'tension'), conQ = (m.conexiones || []).filter(c => c.tipo !== 'tension');
+  const con = conT.map(filaCon).join('') + (conQ.length ? `<details style="margin-top:8px"><summary style="cursor:pointer;font:13px var(--sans);color:var(--gris)">Ver las ${conQ.length} conexiones tranquilas</summary>${conQ.map(filaCon).join('')}</details>` : '');
+  const caza = (m.caza || []).length ? m.caza.map(c => `<div style="border:2px solid #3B5A2C;background:var(--verde-f);border-radius:8px;padding:12px 14px;margin:8px 0;color:var(--verde-t);font:14px/1.5 var(--sans)"><strong>${esc(c.titulo)}</strong> · ${esc(nombreCaja(c.eslabon).split(' · ')[0])}<br>${esc(c.texto)}<br><span style="font-size:12.5px">Me equivoco si: ${esc(c.equivoco)}</span></div>`).join('')
+    : '<p class="vacio">Nada formándose sin descontar este mes.</p>';
+  const VC = { cruzado: ['var(--rojo-f)', 'var(--rojo-t)'], cerca: ['var(--ambar-f)', 'var(--ambar-t)'], tranquila: ['var(--papel-2)', 'var(--gris)'] };
+  const vars = (m.variables || []).map(v => { const [f, tx] = VC[v.estado] || VC.tranquila;
+    return `<div style="background:${f};color:${tx};border-radius:6px;padding:8px 10px;font:12px var(--sans)">${esc(v.id)} ${esc(v.nombre)}<b style="display:block;font:600 17px var(--sans);color:${tx}">${esc(v.hoy)}</b>${esc(v.nota || '')}</div>`; }).join('');
+  const otros = docs.filter(d => !m.tuberias.some(t => t.detalle === d.id)).map(d => `<a class="boton boton--suave boton--peq" href="#/tuberias/${encodeURIComponent(d.id)}">${esc(d.titulo)}</a>`).join(' ');
+  return `<div class="rotulo">Tuberías</div><h1>Cómo fluye el dinero</h1>
+    <p class="entradilla">Actualizado el ${esc(m.actualizado || '')}. Lo gris no pide atención; el color, sí.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0">${ley}</div>
+    <h2>Zona de caza</h2><p class="nota-gris" style="margin:0;font:13px var(--sans)">Cuellos formándose o activos que la bolsa aún no ha pagado.</p>${caza}
+    <h2>Las tuberías</h2><p class="nota-gris" style="margin:0 0 6px;font:13px var(--sans)">Pulsa una para abrirla. Se abren solas las que tienen un cuello sin descontar.</p>${tubs}
+    <h2>Dónde se tocan las tuberías</h2><p class="nota-gris" style="margin:0;font:13px var(--sans)">A la vista, solo las conexiones en tensión: por donde un problema de una tubería se contagia a otra.</p>${con}
+    <h2>Variables</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px">${vars}</div>
+    <p style="margin:14px 0 0">${otros}</p>`;
+}
+function activarTuberias() {
+  const m = datos.tuberias_mapa;
+  if (!m) return;
+  document.querySelectorAll('[data-caja]').forEach(g => g.addEventListener('click', () => {
+    const idc = g.dataset.caja, tid = idc.split('.')[0];
+    const t = m.tuberias.find(x => x.id === tid);
+    let b = null;
+    t && t.columnas.forEach(c => c.cajas.forEach(x => { if (x.id === idc) b = x; }));
+    const d = document.getElementById('tb-det-' + tid);
+    if (b && d) d.innerHTML = `<strong style="color:var(--texto)">${esc(b.nombre)}</strong> · ${esc(b.nota || '')}${b.empresas ? ` <em>Empresas: ${esc(b.empresas)}.</em>` : ''}${b.variable ? ` <em>Variable: ${esc(b.variable)}.</em>` : ''}`;
+  }));
+}
+
+function recursos() {
+  if (!datos.lecturas.length) return '<div class="rotulo">Lecturas</div><h1>Lecturas de la semana</h1><p class="entradilla">Una selección semanal de lo que merece la pena leer, con una línea de por qué. Empieza pronto.</p>';
+  return `<div class="rotulo">Lecturas</div><h1>Lecturas de la semana</h1>${datos.lecturas.map(l => `<div class="prosa"><h2>${esc(l.fecha)}</h2>${l.html}${l.pdf ? `<div style="margin-top:22px">${boton(l.pdf, 'Descargar la lectura (PDF)')}</div>` : ''}</div>`).join('')}`;
+}
+</script>
+</body>
+</html>
+
