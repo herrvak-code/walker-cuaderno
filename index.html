@@ -455,6 +455,8 @@ a.rp-fila:hover{background:var(--papel-2)}
 @media (max-width:900px){.mm-cuerpo{grid-template-columns:1fr} .mm-panel{position:static}}
 .sello-auto{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;margin:4px 0;border-radius:6px;background:var(--ambar-f);color:var(--ambar-t);border:1px dashed #B08A3E;font:600 11.5px var(--sans);letter-spacing:.02em}
 .parte h1{font-size:28px}.parte h3{margin-top:18px}
+.parte-visual{display:block;width:100%;min-height:600px;border:0;margin:8px 0 18px}
+.parte-control{margin:0 0 24px}.parte-control summary{cursor:pointer;font:600 14px var(--sans);color:var(--gris)}
 </style>
 </head>
 <body>
@@ -493,7 +495,7 @@ a.rp-fila:hover{background:var(--papel-2)}
 // Si GitHub Pages o el navegador sirven una versión vieja de esta página,
 // version.json (que nunca se guarda en caché) lo delata y se recarga con
 // una dirección nueva. El generador pone la huella al publicar.
-const VERSION_WEB = 'ed7baa641050';
+const VERSION_WEB = '21eb16baef73';
 fetch('version.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
   if (v && v.web && v.web !== VERSION_WEB && !location.search.includes(v.web)) {
     location.replace(location.pathname + '?v=' + v.web + location.hash);
@@ -1719,13 +1721,27 @@ function selloSinRevisar() {
 
 // Parte del director (17/11/2026, solo privada): el de hoy arriba y los anteriores
 // en botones. El mismo texto se guarda en Drive (_terminal/_director/partes/).
+function parteAlto(f) {
+  try {
+    const ajusta = () => { f.style.height = f.contentDocument.documentElement.scrollHeight + 'px'; };
+    ajusta();
+    f.contentWindow.addEventListener('resize', ajusta);
+    setTimeout(ajusta, 400);  // tras cargar las fuentes
+  } catch (e) { f.style.height = '2400px'; }
+}
 function parte(fecha) {
   const ps = datos.parte || [];
   if (!ps.length) return '<div class="rotulo">Parte</div><h1>Todavía no hay ningún parte</h1>';
   const p = (fecha && ps.find(x => x.fecha === fecha)) || ps[0];
   const otros = ps.filter(x => x !== p).map(x => `<a class="boton boton--suave boton--peq" href="#/parte/${encodeURIComponent(x.fecha)}">${esc(x.fecha.split('-').reverse().join('/'))}</a>`).join(' ');
+  // Parte visual (17/11/2026): va en un iframe para que su estilo no choque con
+  // el del terminal; el alto se ajusta a su contenido. El control completo, plegado.
+  const cuerpo = p.visual
+    ? `<iframe class="parte-visual" title="Parte del director" srcdoc="${esc(p.visual)}" onload="parteAlto(this)"></iframe>
+       <details class="parte-control"><summary>Ver el control completo</summary><div class="prosa parte">${p.html}</div></details>`
+    : `<div class="prosa parte">${p.html}</div>`;
   return `<div class="rotulo">Parte del director${p === ps[0] ? ' · el último' : ''}</div>
-    <div class="prosa parte">${p.html}</div>
+    ${cuerpo}
     ${otros ? `<h2>Partes anteriores</h2><p>${otros}</p>` : ''}`;
 }
 
