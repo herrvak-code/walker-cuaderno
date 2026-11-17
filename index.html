@@ -453,6 +453,8 @@ a.rp-fila:hover{background:var(--papel-2)}
 .mm-panel .cuenta i{width:14px;height:14px;border-radius:3px;display:inline-block;margin-top:3px}
 .mm-pie{margin-top:12px;font:12px/1.5 var(--sans);color:var(--gris)}
 @media (max-width:900px){.mm-cuerpo{grid-template-columns:1fr} .mm-panel{position:static}}
+.sello-auto{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;margin:4px 0;border-radius:6px;background:var(--ambar-f);color:var(--ambar-t);border:1px dashed #B08A3E;font:600 11.5px var(--sans);letter-spacing:.02em}
+.parte h1{font-size:28px}.parte h3{margin-top:18px}
 </style>
 </head>
 <body>
@@ -491,7 +493,7 @@ a.rp-fila:hover{background:var(--papel-2)}
 // Si GitHub Pages o el navegador sirven una versión vieja de esta página,
 // version.json (que nunca se guarda en caché) lo delata y se recarga con
 // una dirección nueva. El generador pone la huella al publicar.
-const VERSION_WEB = '935f66ebd1c0';
+const VERSION_WEB = 'ed7baa641050';
 fetch('version.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
   if (v && v.web && v.web !== VERSION_WEB && !location.search.includes(v.web)) {
     location.replace(location.pathname + '?v=' + v.web + location.hash);
@@ -640,6 +642,7 @@ function foto(x) {
 
 // ---------- secciones ----------
 const MENU = [
+  ['Director', [['parte', 'Parte', 'Lo que toca hoy']]],
   ['Análisis', [['vision', 'Visión', 'En qué entorno estamos'], ['estrategias', 'Estrategias', 'Dividendos, QGV y Alpha'], ['repaso', 'Repaso', 'Qué ha pasado en cada tesis'], ['watchlist', 'Watchlist', 'Lo que sigo de cerca'], ['industrias', 'Industrias', 'Cómo funciona cada sector'], ['tuberias', 'Tuberías', 'Cómo fluye el dinero']]],
   ['Mi cartera', [['cartera', 'Cartera', 'Pesos y movimientos']]],
   ['Recursos', [['metodo', 'Método', 'Cómo trabajo'], ['recursos', 'Lecturas', 'Lo que merece la pena leer']]],
@@ -659,7 +662,7 @@ function pintar() {
   // Sin cartera en los datos (salida pública, 08/11/2026) no se enseña el grupo «Mi cartera».
   // El grupo Biblioteca solo existe con datos.privado (salida privada, 08/11/2026).
   // Repaso (09/11/2026): solo si alguna empresa tiene repaso en esta salida.
-  const hay = id => id === 'cartera' ? datos.cartera : (id === 'biblioteca' || id === 'radar') ? datos.privado
+  const hay = id => id === 'cartera' ? datos.cartera : id === 'parte' ? (datos.parte || []).length : (id === 'biblioteca' || id === 'radar') ? datos.privado
     : id === 'repaso' ? conRepaso().length
     // Pestañas vacías (17/11/2026, Jose: la pública solo lleva Visión, estrategias y repaso): no se enseñan.
     : id === 'metodo' ? datos.metodo : id === 'recursos' ? (datos.lecturas || []).length
@@ -670,7 +673,7 @@ function pintar() {
       const activa = id === marcada;
       return `<a class="item" href="#/${id}"${activa ? ' aria-current="page"' : ''}><span>${esc(t)}</span><small>${esc(s)}</small></a>`;
     }).join('')).join('');
-  const vistas = { vision, estrategias, watchlist, empresa, cartera, metodo, recursos, repaso, industrias, tuberias };
+  const vistas = { vision, estrategias, watchlist, empresa, cartera, metodo, recursos, repaso, industrias, tuberias, parte };
   if (datos.privado) Object.assign(vistas, { biblioteca, radar, otros });
   let html;
   try { html = (vistas[seccion] || vision)(partes[1], partes.slice(1)); }
@@ -817,7 +820,7 @@ function empresa(id) {
   if (!r) return '<h1>No encuentro esa empresa</h1>';
   const x = r.x;
   const trimestres = x.trimestres.length ? x.trimestres.map(t => `<div class="trimestre"><div class="periodo">${esc(t.periodo)}</div>
-      <div class="botones">${t.docs.map(d => boton(d.f, d.tipo + (d.fecha ? ' · ' + d.fecha : ''), 'boton--suave')).join('')}</div></div>`).join('')
+      <div class="botones">${t.docs.map(d => boton(d.f, d.tipo + (d.fecha ? ' · ' + d.fecha : ''), 'boton--suave') + (d.sin_revisar ? selloSinRevisar() : '')).join('')}</div></div>`).join('')
     : '<p class="vacio">La primera ficha previa saldrá unos días antes de los próximos resultados.</p>';
   const complementos = (x.complementos || []).map(d => `<div class="trimestre"><div class="periodo">${esc(d.fecha)}</div>
       <div class="botones"><div>${boton(d.f, d.titulo + ' (PDF)', 'boton--suave')}
@@ -1706,6 +1709,24 @@ function activarTuberias() {
     const d = document.getElementById('tb-det-' + tid);
     if (b && d) d.innerHTML = `<strong style="color:var(--texto)">${esc(b.nombre)}</strong> · ${esc(b.nota || '')}${b.empresas ? ` <em>Empresas: ${esc(b.empresas)}.</em>` : ''}${b.variable ? ` <em>Variable: ${esc(b.variable)}.</em>` : ''}`;
   }));
+}
+
+// Sello «sin revisar por Jose» (17/11/2026): fichas previas y seguimientos que hizo
+// solo el director. Se quita con «python3 director.py --visto-bueno TICKER».
+function selloSinRevisar() {
+  return '<span class="sello-auto" title="Hecho automáticamente por el director; Jose no lo ha revisado todavía">Automático · sin revisar por Jose</span>';
+}
+
+// Parte del director (17/11/2026, solo privada): el de hoy arriba y los anteriores
+// en botones. El mismo texto se guarda en Drive (_terminal/_director/partes/).
+function parte(fecha) {
+  const ps = datos.parte || [];
+  if (!ps.length) return '<div class="rotulo">Parte</div><h1>Todavía no hay ningún parte</h1>';
+  const p = (fecha && ps.find(x => x.fecha === fecha)) || ps[0];
+  const otros = ps.filter(x => x !== p).map(x => `<a class="boton boton--suave boton--peq" href="#/parte/${encodeURIComponent(x.fecha)}">${esc(x.fecha.split('-').reverse().join('/'))}</a>`).join(' ');
+  return `<div class="rotulo">Parte del director${p === ps[0] ? ' · el último' : ''}</div>
+    <div class="prosa parte">${p.html}</div>
+    ${otros ? `<h2>Partes anteriores</h2><p>${otros}</p>` : ''}`;
 }
 
 function recursos() {
