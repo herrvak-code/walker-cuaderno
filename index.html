@@ -484,6 +484,9 @@ a.rp-fila:hover{background:var(--papel-2)}
 .fo-enl{display:flex;gap:6px;flex-shrink:0}
 .fo-enl a{min-height:28px;display:inline-flex;align-items:center;padding:0 10px;border-radius:6px;border:1px solid var(--pizarra-borde);background:var(--pizarra-suave);color:var(--pizarra-osc);text-decoration:none;font:600 12px var(--sans)}
 .fo-enl a:hover{background:var(--pizarra);border-color:var(--pizarra);color:#fff}
+.fo-enl .fo-boton{min-height:28px;padding:0 10px;border-radius:6px;border:1px solid var(--pizarra);background:var(--pizarra);color:#fff;font:600 12px var(--sans);cursor:pointer}
+.fo-enl .fo-boton:hover{background:var(--pizarra-osc)}
+button.fo-fijado{text-align:left;cursor:pointer;width:100%}
 .fo-mas{display:block;width:100%;min-height:40px;border:0;background:none;color:var(--pizarra);font:600 13px var(--sans);cursor:pointer}
 @media (max-width:720px){.fo-busca kbd{display:none}.fo-fila .s{white-space:normal}.fo-enl{flex-direction:column}}
 </style>
@@ -524,7 +527,7 @@ a.rp-fila:hover{background:var(--papel-2)}
 // Si GitHub Pages o el navegador sirven una versión vieja de esta página,
 // version.json (que nunca se guarda en caché) lo delata y se recarga con
 // una dirección nueva. El generador pone la huella al publicar.
-const VERSION_WEB = '1ec8da6ed78b';
+const VERSION_WEB = 'b0ff5c081176';
 fetch('version.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
   if (v && v.web && v.web !== VERSION_WEB && !location.search.includes(v.web)) {
     location.replace(location.pathname + '?v=' + v.web + location.hash);
@@ -1789,6 +1792,8 @@ const foIni = f => foPartes(f)[0].split(/\s+/).filter(w => w.length > 2).slice(0
 const foUrl = x => x.d || x.u;
 function foEnlaces(x) {
   let h = '';
+  if (x.hf) h += `<button type="button" class="fo-boton" data-fo-h="${esc(x.hf)}">Abrir</button>`;
+  if (x.i) h += `<a href="#/industrias/${encodeURIComponent(x.i)}">Ver ficha</a>`;
   if (x.d) h += `<a href="${esc(x.d)}" target="_blank" rel="noopener">Drive</a>`;
   if (x.u) h += `<a href="${esc(x.u)}" target="_blank" rel="noopener">${x.o === 'hoja' ? 'Abrir hoja' : 'Web'}</a>`;
   return h;
@@ -1796,7 +1801,8 @@ function foEnlaces(x) {
 function formacion() {
   const it = datos.formacion || [];
   if (!it.length) return '<div class="rotulo">Formación</div><h1>Todavía no hay panel de formación</h1>';
-  const fij = it.filter(x => x.fav).map(x => `<a class="fo-fijado" href="${esc(foUrl(x))}" target="_blank" rel="noopener" style="--c:${FO_COLOR[x.l] || '#6E6557'}"><span class="fo-ic">${esc(foIni(x.f))}</span>${esc(foPartes(x.f)[0])}</a>`).join('');
+  const fij = it.filter(x => x.fav).map(x => x.hf ? `<button type="button" class="fo-fijado" data-fo-h="${esc(x.hf)}" style="--c:${FO_COLOR[x.l] || '#6E6557'}"><span class="fo-ic">${esc(foIni(x.f))}</span>${esc(foPartes(x.f)[0])}</button>`
+    : `<a class="fo-fijado" href="${esc(x.i ? '#/industrias/' + encodeURIComponent(x.i) : foUrl(x))}"${x.i ? '' : ' target="_blank" rel="noopener"'} style="--c:${FO_COLOR[x.l] || '#6E6557'}"><span class="fo-ic">${esc(foIni(x.f))}</span>${esc(foPartes(x.f)[0])}</a>`).join('');
   return `<div class="rotulo">Formación · acceso directo</div>
     <h1>Todo lo que tengo para aprender y trabajar</h1>
     <p class="entradilla">Cursos, hojas de cálculo, plantillas, herramientas y páginas propias, cada uno con su enlace. Escribe para buscar; ↑↓ para moverte y Enter para abrir.</p>
@@ -1831,14 +1837,28 @@ function foPintar() {
   document.getElementById('fo-lista').innerHTML = (filas || '<p class="nota-gris" style="padding:14px">Nada con esa búsqueda.</p>') + mas;
   document.querySelectorAll('#fo-tipos .fo-chip').forEach(b => b.onclick = () => { fo.tipo = b.dataset.t; fo.sel = 0; foPintar(); });
   document.querySelectorAll('#fo-lineas .fo-chip').forEach(b => b.onclick = () => { fo.linea = fo.linea === b.dataset.l ? '' : b.dataset.l; fo.sel = 0; foPintar(); });
-  document.querySelectorAll('.fo-fila').forEach(r => r.onclick = e => { if (e.target.tagName !== 'A') foAbrir(+r.dataset.i); });
+  document.querySelectorAll('.fo-fila').forEach(r => r.onclick = e => { if (!['A', 'BUTTON'].includes(e.target.tagName)) foAbrir(+r.dataset.i); });
+  document.querySelectorAll('[data-fo-h]').forEach(b => b.onclick = () => foAbrirPagina(b.dataset.foH));
   const m = document.getElementById('fo-mas'); if (m) m.onclick = () => { fo.max += 200; foPintar(); };
 }
-function foAbrir(i) { const x = fo.vis[i]; if (x) window.open(foUrl(x), '_blank', 'noopener'); }
+// Las páginas propias van cifradas: se abre la pestaña al momento (si no, Safari la bloquea)
+// y se le pasa la página cuando está descifrada. Las fichas de industria, en su pestaña.
+function foAbrirPagina(id) {
+  const w = window.open('', '_blank');
+  urlDe(id, 'text/html').then(u => { if (w) w.location = u; else location.href = u; });
+}
+function foAbrir(i) {
+  const x = fo.vis[i];
+  if (!x) return;
+  if (x.hf) return foAbrirPagina(x.hf);
+  if (x.i) { location.hash = '#/industrias/' + encodeURIComponent(x.i); return; }
+  window.open(foUrl(x), '_blank', 'noopener');
+}
 function activarFormacion() {
   const q = document.getElementById('fo-q');
   if (!q) return;
   q.value = fo.q;
+  document.querySelectorAll('.fo-fijados [data-fo-h]').forEach(b => b.onclick = () => foAbrirPagina(b.dataset.foH));
   q.addEventListener('input', () => { fo.q = q.value; fo.sel = 0; fo.max = 80; foPintar(); });
   q.addEventListener('keydown', e => {
     if (e.key === 'ArrowDown') { fo.sel = Math.min(fo.sel + 1, Math.min(fo.vis.length, fo.max) - 1); foPintar(); e.preventDefault(); }
