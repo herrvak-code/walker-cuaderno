@@ -457,6 +457,35 @@ a.rp-fila:hover{background:var(--papel-2)}
 .parte h1{font-size:28px}.parte h3{margin-top:18px}
 .parte-visual{display:block;width:100%;min-height:600px;border:0;margin:8px 0 18px}
 .parte-control{margin:0 0 24px}.parte-control summary{cursor:pointer;font:600 14px var(--sans);color:var(--gris)}
+/* ---------- Formación (18/11/2026, solo privada): lanzadera de acceso directo ---------- */
+.fo-busca{display:flex;align-items:center;gap:10px;margin-top:22px;padding:0 16px;min-height:54px;background:var(--blanco);border:1px solid var(--linea-2);border-radius:10px;box-shadow:0 6px 24px rgba(27,23,18,.07)}
+.fo-busca input{flex:1;border:0;outline:0;background:transparent;font:500 17px var(--sans);color:var(--texto)}
+.fo-busca kbd{font:11px var(--sans);color:var(--gris);border:1px solid var(--linea-2);border-radius:4px;padding:1px 6px}
+.fo-filtros{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.fo-chip{min-height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--linea-2);background:var(--blanco);color:var(--texto-2);font:500 13px var(--sans);cursor:pointer}
+.fo-chip:hover{border-color:var(--pizarra-borde);color:var(--pizarra-osc)}
+.fo-chip[aria-pressed=true]{background:var(--pizarra);border-color:var(--pizarra);color:#fff}
+.fo-chip small{opacity:.7;margin-left:4px}
+.fo-lineas .fo-chip{display:inline-flex;align-items:center;gap:6px}
+.fo-lineas .fo-chip i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.fo-lineas .fo-chip[aria-pressed=true]{background:var(--c);border-color:var(--c)}
+.fo-lineas .fo-chip[aria-pressed=true] i{background:#fff}
+.fo-fijados{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin-top:18px}
+.fo-fijado{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--papel-2);border:1px solid var(--linea);border-radius:8px;text-decoration:none;color:var(--texto);font:500 13.5px/1.3 var(--sans)}
+.fo-fijado:hover{background:var(--pizarra-suave);border-color:var(--pizarra-borde);color:var(--pizarra-osc)}
+.fo-ic{flex-shrink:0;width:30px;height:30px;border-radius:7px;display:grid;place-items:center;background:var(--c);color:#fff;font:600 11.5px var(--sans);letter-spacing:.02em}
+.fo-meta{margin:18px 2px 6px;font:12px var(--sans);color:var(--gris)}
+.fo-lista{padding:6px}
+.fo-fila{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;cursor:pointer}
+.fo-fila:hover,.fo-fila.sel{background:var(--pizarra-suave)}
+.fo-fila .tx{flex:1;min-width:0}
+.fo-fila .t{font:500 15px/1.3 var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fo-fila .s{font:12.5px/1.4 var(--sans);color:var(--gris);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fo-enl{display:flex;gap:6px;flex-shrink:0}
+.fo-enl a{min-height:28px;display:inline-flex;align-items:center;padding:0 10px;border-radius:6px;border:1px solid var(--pizarra-borde);background:var(--pizarra-suave);color:var(--pizarra-osc);text-decoration:none;font:600 12px var(--sans)}
+.fo-enl a:hover{background:var(--pizarra);border-color:var(--pizarra);color:#fff}
+.fo-mas{display:block;width:100%;min-height:40px;border:0;background:none;color:var(--pizarra);font:600 13px var(--sans);cursor:pointer}
+@media (max-width:720px){.fo-busca kbd{display:none}.fo-fila .s{white-space:normal}.fo-enl{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -495,7 +524,7 @@ a.rp-fila:hover{background:var(--papel-2)}
 // Si GitHub Pages o el navegador sirven una versión vieja de esta página,
 // version.json (que nunca se guarda en caché) lo delata y se recarga con
 // una dirección nueva. El generador pone la huella al publicar.
-const VERSION_WEB = '21eb16baef73';
+const VERSION_WEB = '1ec8da6ed78b';
 fetch('version.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
   if (v && v.web && v.web !== VERSION_WEB && !location.search.includes(v.web)) {
     location.replace(location.pathname + '?v=' + v.web + location.hash);
@@ -647,7 +676,7 @@ const MENU = [
   ['Director', [['parte', 'Parte', 'Lo que toca hoy']]],
   ['Análisis', [['vision', 'Visión', 'En qué entorno estamos'], ['estrategias', 'Estrategias', 'Dividendos, QGV y Alpha'], ['repaso', 'Repaso', 'Qué ha pasado en cada tesis'], ['watchlist', 'Watchlist', 'Lo que sigo de cerca'], ['industrias', 'Industrias', 'Cómo funciona cada sector'], ['tuberias', 'Tuberías', 'Cómo fluye el dinero']]],
   ['Mi cartera', [['cartera', 'Cartera', 'Pesos y movimientos']]],
-  ['Recursos', [['metodo', 'Método', 'Cómo trabajo'], ['recursos', 'Lecturas', 'Lo que merece la pena leer']]],
+  ['Recursos', [['metodo', 'Método', 'Cómo trabajo'], ['recursos', 'Lecturas', 'Lo que merece la pena leer'], ['formacion', 'Formación', 'Cursos, hojas y herramientas']]],
   ['Biblioteca', [['biblioteca', 'Biblioteca', 'Lo que dicen otros'], ['radar', 'Radar', 'Lo entrado esta semana']]]
 ];
 
@@ -664,7 +693,7 @@ function pintar() {
   // Sin cartera en los datos (salida pública, 08/11/2026) no se enseña el grupo «Mi cartera».
   // El grupo Biblioteca solo existe con datos.privado (salida privada, 08/11/2026).
   // Repaso (09/11/2026): solo si alguna empresa tiene repaso en esta salida.
-  const hay = id => id === 'cartera' ? datos.cartera : id === 'parte' ? (datos.parte || []).length : (id === 'biblioteca' || id === 'radar') ? datos.privado
+  const hay = id => id === 'cartera' ? datos.cartera : id === 'parte' ? (datos.parte || []).length : id === 'formacion' ? (datos.formacion || []).length : (id === 'biblioteca' || id === 'radar') ? datos.privado
     : id === 'repaso' ? conRepaso().length
     // Pestañas vacías (17/11/2026, Jose: la pública solo lleva Visión, estrategias y repaso): no se enseñan.
     : id === 'metodo' ? datos.metodo : id === 'recursos' ? (datos.lecturas || []).length
@@ -675,7 +704,7 @@ function pintar() {
       const activa = id === marcada;
       return `<a class="item" href="#/${id}"${activa ? ' aria-current="page"' : ''}><span>${esc(t)}</span><small>${esc(s)}</small></a>`;
     }).join('')).join('');
-  const vistas = { vision, estrategias, watchlist, empresa, cartera, metodo, recursos, repaso, industrias, tuberias, parte };
+  const vistas = { vision, estrategias, watchlist, empresa, cartera, metodo, recursos, repaso, industrias, tuberias, parte, formacion };
   if (datos.privado) Object.assign(vistas, { biblioteca, radar, otros });
   let html;
   try { html = (vistas[seccion] || vision)(partes[1], partes.slice(1)); }
@@ -689,6 +718,7 @@ function pintar() {
   if (marco) cargarEdicion(marco);
   if (seccion === 'industrias') activarIndustrias();
   if (seccion === 'tuberias') activarTuberias();
+  if (seccion === 'formacion') activarFormacion();
 }
 
 function avisoLegal() {
@@ -1743,6 +1773,79 @@ function parte(fecha) {
   return `<div class="rotulo">Parte del director${p === ps[0] ? ' · el último' : ''}</div>
     ${cuerpo}
     ${otros ? `<h2>Partes anteriores</h2><p>${otros}</p>` : ''}`;
+}
+
+// ---------- Formación (18/11/2026, solo privada) ----------
+// Lanzadera de acceso directo: cursos, hojas de cálculo, plantillas, herramientas y
+// páginas propias. Solo enlaces (Drive y webs); lo genera 00_gen_panel_acceso.py.
+const FO_TIPOS = ['Todo', 'Mis herramientas', 'Mis páginas', 'Cursos', 'Hojas de cálculo', 'Plantillas', 'Herramientas', 'Lecturas', 'Libros', 'Otros'];
+const FO_LINEAS = [['Análisis y valoración', '#2E5F73'], ['Dividendos', '#8E6A2F'], ['Macro y economía', '#2E4D73'], ['Opciones y corto plazo', '#8A3A2C'],
+  ['Cartera y psicología', '#5E4B73'], ['IA aplicada', '#2F6B68'], ['Biblioteca', '#3B5A2C'], ['Finanzas personales', '#6B7A3A'], ['Herramientas', '#6E6557'], ['Otros', '#8A8073']];
+const FO_COLOR = Object.fromEntries(FO_LINEAS);
+const fo = { tipo: 'Todo', linea: '', q: '', sel: 0, max: 80, vis: [] };
+const foNorm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const foPartes = f => { const m = String(f).match(/^([^(]+?)\s*\((.+)\)\s*$/); return m ? [m[1], m[2]] : [f, '']; };
+const foIni = f => foPartes(f)[0].split(/\s+/).filter(w => w.length > 2).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '·';
+const foUrl = x => x.d || x.u;
+function foEnlaces(x) {
+  let h = '';
+  if (x.d) h += `<a href="${esc(x.d)}" target="_blank" rel="noopener">Drive</a>`;
+  if (x.u) h += `<a href="${esc(x.u)}" target="_blank" rel="noopener">${x.o === 'hoja' ? 'Abrir hoja' : 'Web'}</a>`;
+  return h;
+}
+function formacion() {
+  const it = datos.formacion || [];
+  if (!it.length) return '<div class="rotulo">Formación</div><h1>Todavía no hay panel de formación</h1>';
+  const fij = it.filter(x => x.fav).map(x => `<a class="fo-fijado" href="${esc(foUrl(x))}" target="_blank" rel="noopener" style="--c:${FO_COLOR[x.l] || '#6E6557'}"><span class="fo-ic">${esc(foIni(x.f))}</span>${esc(foPartes(x.f)[0])}</a>`).join('');
+  return `<div class="rotulo">Formación · acceso directo</div>
+    <h1>Todo lo que tengo para aprender y trabajar</h1>
+    <p class="entradilla">Cursos, hojas de cálculo, plantillas, herramientas y páginas propias, cada uno con su enlace. Escribe para buscar; ↑↓ para moverte y Enter para abrir.</p>
+    <label class="fo-busca"><span aria-hidden="true">⌕</span><input id="fo-q" type="search" placeholder="Busca un curso, una hoja, una herramienta…" autocomplete="off"><kbd>↑↓</kbd><kbd>↵</kbd></label>
+    <div class="fo-filtros" id="fo-tipos" role="group" aria-label="Tipo"></div>
+    <div class="fo-filtros fo-lineas" id="fo-lineas" role="group" aria-label="Línea"></div>
+    ${fij ? `<div class="fo-fijados">${fij}</div>` : ''}
+    <div class="fo-meta" id="fo-meta"></div>
+    <div class="panel"><div class="fo-lista" id="fo-lista"></div></div>`;
+}
+function foPintar() {
+  const it = datos.formacion || [];
+  const q = foNorm(fo.q);
+  const pasa = x => !q || foNorm([x.f, x.a, x.s, x.l, x.c].join(' ')).includes(q);
+  const base = it.filter(pasa);
+  document.getElementById('fo-tipos').innerHTML = FO_TIPOS.map(t => {
+    const n = t === 'Todo' ? base.length : base.filter(x => x.c === t).length;
+    return n || t === fo.tipo ? `<button type="button" class="fo-chip" data-t="${esc(t)}" aria-pressed="${t === fo.tipo}">${esc(t)}<small>${n}</small></button>` : '';
+  }).join('');
+  document.getElementById('fo-lineas').innerHTML = FO_LINEAS.filter(([l]) => base.some(x => x.l === l)).map(([l, c]) =>
+    `<button type="button" class="fo-chip" data-l="${esc(l)}" aria-pressed="${l === fo.linea}" style="--c:${c}"><i></i>${esc(l)}</button>`).join('');
+  fo.vis = base.filter(x => (fo.tipo === 'Todo' || x.c === fo.tipo) && (!fo.linea || x.l === fo.linea))
+    .sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0) || a.f.localeCompare(b.f, 'es'));
+  fo.sel = Math.min(fo.sel, Math.max(fo.vis.length - 1, 0));
+  document.getElementById('fo-meta').textContent = `${fo.vis.length} de ${it.length} accesos` + (fo.linea ? ' · ' + fo.linea : '') + (fo.tipo !== 'Todo' ? ' · ' + fo.tipo : '');
+  const filas = fo.vis.slice(0, fo.max).map((x, i) => {
+    const [t, s] = foPartes(x.f);
+    const sub = [s || x.s || x.a, x.c].filter(Boolean).join(' · ');
+    return `<div class="fo-fila${i === fo.sel ? ' sel' : ''}" data-i="${i}" style="--c:${FO_COLOR[x.l] || '#6E6557'}"><span class="fo-ic">${esc(foIni(x.f))}</span><div class="tx"><div class="t">${esc(t)}</div><div class="s">${esc(sub)}</div></div><div class="fo-enl">${foEnlaces(x)}</div></div>`;
+  }).join('');
+  const mas = fo.vis.length > fo.max ? `<button type="button" class="fo-mas" id="fo-mas">Ver ${fo.vis.length - fo.max} más</button>` : '';
+  document.getElementById('fo-lista').innerHTML = (filas || '<p class="nota-gris" style="padding:14px">Nada con esa búsqueda.</p>') + mas;
+  document.querySelectorAll('#fo-tipos .fo-chip').forEach(b => b.onclick = () => { fo.tipo = b.dataset.t; fo.sel = 0; foPintar(); });
+  document.querySelectorAll('#fo-lineas .fo-chip').forEach(b => b.onclick = () => { fo.linea = fo.linea === b.dataset.l ? '' : b.dataset.l; fo.sel = 0; foPintar(); });
+  document.querySelectorAll('.fo-fila').forEach(r => r.onclick = e => { if (e.target.tagName !== 'A') foAbrir(+r.dataset.i); });
+  const m = document.getElementById('fo-mas'); if (m) m.onclick = () => { fo.max += 200; foPintar(); };
+}
+function foAbrir(i) { const x = fo.vis[i]; if (x) window.open(foUrl(x), '_blank', 'noopener'); }
+function activarFormacion() {
+  const q = document.getElementById('fo-q');
+  if (!q) return;
+  q.value = fo.q;
+  q.addEventListener('input', () => { fo.q = q.value; fo.sel = 0; fo.max = 80; foPintar(); });
+  q.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { fo.sel = Math.min(fo.sel + 1, Math.min(fo.vis.length, fo.max) - 1); foPintar(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { fo.sel = Math.max(fo.sel - 1, 0); foPintar(); e.preventDefault(); }
+    else if (e.key === 'Enter') { foAbrir(fo.sel); e.preventDefault(); }
+  });
+  foPintar();
 }
 
 function recursos() {
